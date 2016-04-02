@@ -1,0 +1,101 @@
+#!/usr/bin/python -u
+# Copyright 2014 James P Goodwin music tool
+# This is a tool to create improvised music based on chord progression, and/or melody and ryththm
+import soundgen
+import notes
+from soundgen import init_sample_cache,improvise_ex,DeltaGenerator,arpegiate_ex,play_song,load_music
+from notes import Song, C, N
+from optparse import OptionParser
+import traceback
+import sys
+
+def main(options, args):
+    """ The main driver for the music utility """
+    deltas = []
+    d_gen = None
+    stime = 0                      
+    chords = []
+    melody = []
+    rhythm = []
+    bpm = 0
+    
+    soundgen.set_verbose(options.verbose)
+    soundgen.set_debug(options.debug)
+                                         
+    if not options.samples:
+        options.samples = ["./ssamples"]
+                                      
+    voice = 0
+    for sample_path in options.samples:
+        params = sample_path.split(",")
+        if len(params) == 1:
+            if options.verbose:
+                print "loading",sample_path, voice
+            init_sample_cache(sample_path,voice,verbose=options.verbose)
+        else:
+            if options.verbose:
+                print "loading",sample_path, voice
+            init_sample_cache(params[0],voice,int(params[1]),int(params[2]),verbose=options.verbose)
+        voice += 1
+
+    if options.deltas:
+        for ln in open(options.deltas,"r"):
+            deltas.append(int(ln.strip()))
+        d_gen = DeltaGenerator(deltas)
+            
+    if options.time:
+        stime = int(options.time)
+    
+    if options.chords:
+        chords = load_music(options.chords)
+        
+    if options.melody:
+        melody = load_music(options.melody)
+        
+    if options.rhythm:
+        rhythm = load_music(options.rhythm)
+        
+    if options.bpm:
+        bpm = int(options.bpm)
+        
+    voices = options.voices.split(",")
+    chord_voice = int(voices[0])
+    melody_voice = int(voices[1])
+    rhythm_voice = int(voices[2])
+        
+    s = Song( options.swing, bpm, 4,4, chords, melody, rhythm, stime, chord_voice,melody_voice,rhythm_voice )
+
+    s.melody = improvise_ex(s, delta_gen = d_gen)
+    s.rhythm = arpegiate_ex(s)
+
+    play_song( s, options.output )
+
+
+
+
+if __name__ == '__main__':
+    parser = OptionParser(usage="usage: %prog [options] ", description="A tool to create improvised music based on chord progression, and/or melody and rhythm")
+    parser.add_option("-c","--chords", dest="chords", default="", help="Read chord progression from file")
+    parser.add_option("-m","--melody", dest="melody", default="", help="Read melody from file")
+    parser.add_option("-r","--rhythm", dest="rhythm", default="", help="Read rhythm from file")
+    parser.add_option("-n","--chorus", dest="chorus", default="", help="Number of choruses")
+    parser.add_option("-t","--time", dest="time", default="", help="Total seconds to generate music for")
+    parser.add_option("-o","--output",dest="output",default="music.wav", help="Output file to save music")
+    parser.add_option("-b","--bpm",dest="bpm",default="120",help="Beats per minute for tempo")
+    parser.add_option("-s","--swing",dest="swing",action="store_true", default=False, help="Swing the notes in the improvisation")
+    parser.add_option("-d","--deltas",dest="deltas", default="", help="Read the stream of delta values to generate melody from file" )
+    parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Log all activity to console")
+    parser.add_option("-D","--debug", dest="debug", action="store_true", default=False, help="save debug versions of the parts")
+    parser.add_option("-S","--samples", dest="samples", default = [], action="append", help="Add path to additional voice with samples")
+    parser.add_option("-V","--voices", dest="voices", default="0,0,0", help="Voice numbers {chord_voice},{melody_voice},{rhythm_voice}")
+    
+    (options,args) = parser.parse_args()
+                           
+    try:
+        ret = main(options,args)
+    except:
+        tb = traceback.format_exc()
+        print >>sys.stderr, tb
+        exit(1)
+        
+    exit(ret)

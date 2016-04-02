@@ -1,0 +1,12 @@
+[
+C("C3Min7",1),C("C3-Maj7",1),C("C3Min7",1),C("C3Min6",1),
+C("Ab3Maj7",1),C("F3Min7",1),C("D3Min7b5",1),C("G37b9",1),
+C("C3Min7",1),C("C3-Maj7",1),C("C3Min7",1),C("C3Min6",1),
+C("Ab3Maj7",1),C("F3Min7",1),C("Ab3Min6",1),C("Bb37b9",1),
+C("Db3Maj7",2),C("F3Min7",2),C("G3Min7",2),C("F3Min7",2),C("Eb3Maj7",2),C("F3Min7",2),C("G3Min7",2),C("F3Min7",2),
+C("Eb3Maj7",2),C("G37",2),C("C3Min7",2),C("Bb3Min7",4),C("A37",4),C("Ab3Maj7",1),C("D3Min7b5",2),C("G37b9",2),
+C("C3Min7",1),C("C3-Maj7",1),C("C3Min7",1),C("C3Min6",1),
+C("Ab3Maj7",1),C("D3Min7b5",2),C("G37b9",2),C("C3Min7",1),C("Bb3Min7",2),C("A37#11",2),
+C("Ab3Maj7",1),C("F3Min7",2),C("Bb37b9",2),C("Eb37",1),C("D3Min7b5",2),C("G37b9",2)
+] * 3
+
