@@ -443,6 +443,14 @@ class N:
     def __repr__(self):
         return "N(\"%s\",%d)"%(self.name,self.value)
         
+class S:
+    def __init__(self, name, value ):
+        self.name = name
+        self.value = value
+        
+    def __repr__(self):
+        return "S(\"%s\",%s)"%(self.name,str(self.value))
+        
 class Song:
     def __init__(self, swing, tempo, measure, beat, chords, melody=None, rhythm=None, song_time= 0, chord_voice = 0, melody_voice = 0, rhythm_voice = 0 ):
         self.swing = swing

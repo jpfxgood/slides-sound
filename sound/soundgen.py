@@ -1,7 +1,7 @@
 #!/usr/bin/python -u
 import math
 import wave
-from notes import notes, scale, chord, C, N, Song, duration, chord2scales, split_chord, join_chord, init_sample_cache, get_cached_sample, closest_index_in_scale
+from notes import notes, scale, chord, C, N, S, Song, duration, chord2scales, split_chord, join_chord, init_sample_cache, get_cached_sample, closest_index_in_scale
 import time
 import re
 import random
@@ -189,12 +189,14 @@ def gen_chord( name = "C4Maj", sr = 44100.0, t = 5.0, max_amp = global_max_amp, 
 def gen_line( line, tempo = 120, add_swing = False, dyn = "f",voice=0 ):
     total_time = 0.0
     output = ''  
-    swing = 0.0
+    swing = 0.0 
+    dyns = [ "ff","f","mf","f","ff"]
     if add_swing:
         swing = (duration(tempo, 8)/8.0)
-    cur_dyn = dyn
+    dyn_idx = dyns.index(dyn)
     eidx = 0
-    while eidx < len(line):
+    while eidx < len(line): 
+        cur_dyn = dyns[dyn_idx]
         event = line[eidx]
         tn = duration(tempo, event.value)+swing
         if event.name == "R":
@@ -216,16 +218,9 @@ def gen_line( line, tempo = 120, add_swing = False, dyn = "f",voice=0 ):
         total_time += tn
         swing = -swing
         if random.randint(1,10) <= 4:
-            if cur_dyn == "ff":
-                cur_dyn = "f"
-            elif cur_dyn == "f":
-                cur_dyn = "mf"
-            elif cur_dyn == "mf":
-                cur_dyn = "mp"
-            elif cur_dyn == "mp":
-                cur_dyn = "p"
-            elif cur_dyn == "p":
-                cur_dyn = "ff"
+            dyn_idx += 1
+            if dyn_idx >= len(dyns):
+                dyn_idx = 0
     if verbose:
         print "gen_line, total_time",total_time
     return output
@@ -353,7 +348,7 @@ def improvise_scale_phrase( chords, note_idx=8, note_dir=1, harm=False, transpos
                 else:
                     note_len = random.randint(1,eighths)
  
-            rest = ( random.randint(1,10) <= 2) and not ending
+            rest = ( random.randint(1,20) <= 2) and not ending
             if rest:
                 nn = N('R',nl[note_len])
             elif harm:
@@ -526,9 +521,9 @@ def arpegiate_ex( song, transpose = -1 ):
         eighths = value_to_eighths[c.value]
 
         if not phrase_time:
-            play_chord = (random.randint(1,10) < 4)
-            punch_chord = (random.randint(1,10) < 4)
-            lay_out = (random.randint(1,10) < 4)
+            play_chord = (random.randint(1,10) <= 2)
+            punch_chord = (random.randint(1,10) <= 2)
+            lay_out = (random.randint(1,10) <= 2)
             
         phrase_time += eighths
         if phrase_time >= phrase_eighths:
@@ -659,7 +654,7 @@ def play_song( s, out_file = "soundgen.wav" ):
     if verbose:
         print "Synthesizing Melody"
         print "melody eighths =",sum_eighths(s.melody)
-    melody_line = gen_line( s.melody,s.tempo,s.swing,"ff",s.melody_voice)
+    melody_line = gen_line( s.melody,s.tempo,s.swing,"f",s.melody_voice)
     if debug:
         save_sample(melody_line,"melody.wav",1)
     melody_line = reverb(melody_line)
@@ -669,7 +664,7 @@ def play_song( s, out_file = "soundgen.wav" ):
     if verbose:
         print "Synthesizing Bass"
         print "bass eighths = ",sum_eighths(s.rhythm)
-    bass_line = gen_line( s.rhythm,s.tempo,s.swing,"ff",s.rhythm_voice)
+    bass_line = gen_line( s.rhythm,s.tempo,s.swing,"f",s.rhythm_voice)
     if debug:
         save_sample(bass_line,"bass.wav",1)
     bass_line = reverb(bass_line)
@@ -681,7 +676,7 @@ def play_song( s, out_file = "soundgen.wav" ):
 #    save_sample(chords_n_bass,"chordsnbass.wav",1)
     if verbose:
         print "Balancing Channels"
-    ls,rs = balance( bass_line, 0.50, 0.50, melody_line, 0.50, 0.50 )
+    ls,rs = balance( bass_line, 0.60, 0.40, melody_line, 0.40, 0.60 )
     if verbose:
         print "Saving song"
     idx = 0
