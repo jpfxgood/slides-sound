@@ -4,10 +4,9 @@
 import sys
 import os     
 import re
-import time
 from optparse import OptionParser
 import traceback
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from PIL.ExifTags import TAGS
 import subprocess
 from multiprocessing import Pool
@@ -67,27 +66,7 @@ def process_frame( img_name, out_frame, width, height, verbose = False ):
                 if k in TAGS and TAGS[k] == "Orientation":
                     img_orientation = v
                     break
-            
-#        img = img.resize( (int(width),int(height)), Image.BICUBIC)
-    
-        img_hist = []
-        try:
-            img_hist = img.histogram()
-            if options.verbose:
-                print "Adding histogram"
-        except:
-            if options.verbose:
-                print "Error: Histogram failed!"
-    
-        deltas = open(out_frame+".dat","w")
-        for hist_idx in range(0,len(img_hist)-1):
-            if img_hist[hist_idx+1] < img_hist[hist_idx]:
-                print >>deltas, -1
-            elif img_hist[hist_idx+1] > img_hist[hist_idx]:
-                print >>deltas, 1
-            else:
-                print >>deltas, 0
-    
+           
         if img_orientation == 6:
             if options.verbose:
                 print "Rotating Image"
@@ -115,8 +94,8 @@ def process_frame( img_name, out_frame, width, height, verbose = False ):
         img.save(out_frame)
     except:
         tb = traceback.format_exc()
-        print img_name
         print >>sys.stderr, tb
+        exit(1)
 
 def saferemove( fname ):
     if os.path.exists(fname):
@@ -133,59 +112,74 @@ def main(options, args):
 
     p = Pool(10)
     frame_idx = 0
+    frames = []
     for img_name in slides:
-        p.apply_async(process_frame,( img_name,"frame%05d.jpg"%frame_idx,options.width, options.height, options.verbose ))
+        while True:
+            out_name = "%s/frame%04d.jpg"%(options.path,frame_idx)
+            if os.path.exists( out_name ):
+                frame_idx += 1
+            else:
+                break
+        p.apply_async(process_frame,( img_name, out_name, options.width, options.height, options.verbose ))
+        frames.append((img_name, out_name))
         frame_idx += 1
     p.close()
     p.join()
-           
-    slideshow_name = time.strftime("slideshow%Y%m%d%H%M%S.mp4")
-    saferemove(slideshow_name)
-    cmd = "avconv -r %d -i frame%%05d.jpg -r 24 -vsync cfr -s %dx%d %s"%(int(options.rate),int(options.width),int(options.height),slideshow_name)
-    if options.verbose:
-        print "Generating %s: "%slideshow_name, cmd
-    run(cmd)
     
-    if not options.dontclean:
-        if options.verbose:
-            print "Cleaning up frames and writing deltas"
+    sheet = 0
+    row = 0
+    column = 0
+    sheet_width = options.columns * options.width
+    sheet_height = options.rows * options.height
+    sheet_image = None
+    fnt = ImageFont.load_default()
+    for (i,f) in frames:
+        img = Image.open(f,"r")
+        if not sheet_image:
+            sheet_image = Image.new( img.mode, (int(sheet_width),int(sheet_height)), "black")
+            drw =  ImageDraw.Draw(sheet_image)
+        sheet_image.paste(img, (column*options.width, row*options.height))
+        if options.labels:
+            txt_width,txt_height = drw.textsize(i,font=fnt)
+            j = None
+            if txt_width > options.width:
+                j = i[len(i)/2:]
+                i = i[:len(i)/2]
+                txt_width,txt_height = drw.textsize(i,font=fnt)
+            drw.rectangle([(column*options.width,row*options.height),((column*options.width)+txt_width,(row*options.height)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+            drw.text((column*options.width,row*options.height),i,font=fnt,fill=(255,255,255,255))
+            if j:
+                txt_width,txt_height = drw.textsize(j,font=fnt)
+                drw.rectangle([(column*options.width,(row*options.height)+txt_height),((column*options.width)+txt_width,(row*options.height)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                drw.text((column*options.width,(row*options.height)+txt_height),j,font=fnt,fill=(255,255,255,255))
+                
+        saferemove(f)
+        column = column + 1
+        if column > options.columns:
+            column = 0
+            row = row + 1
+        if row > options.rows:
+            row = 0
+            sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
+            sheet = sheet + 1
+            sheet_image = None
+    if sheet_image:
+        sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
     
-        saferemove("deltas.dat")
-        for fx in range(0,frame_idx):
-            saferemove("frame%05d.jpg"%fx)
-            dlts = open("frame%05d.jpg.dat"%fx,"r").read()
-            open("deltas.dat","a").write(dlts)
-            saferemove("frame%05d.jpg.dat"%fx)
-                                  
-    if options.music:                        
-        cmd = "../sound/music -c %s -t %d -d %s -o %s -b %d %s -S ../sound/ssamples"%(options.music,(frame_idx-1)/int(options.rate),"deltas.dat","./music.wav",options.bpm,("-s" if options.swing else ""))
-        if options.verbose:
-            print "Generating music.wav: ", cmd
-        run(cmd)
-                                 
-        slideshow_plus_name = "plus_"+slideshow_name
-        saferemove(slideshow_plus_name)
-            
-        cmd = "avconv -i %s -i music.wav -shortest %s"%(slideshow_name,slideshow_plus_name)
-        if options.verbose:
-            print "Merging music into %s: "%slideshow_plus_name, cmd
-        run(cmd)
-
     if options.verbose:
         print "Done"
     return 0
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] [path with wildcard to the images]", description="A tool to create slide show videos from a set of photos")
+    parser = OptionParser(usage="usage: %prog [options] [path with wildcard to the images]", description="A tool to resize all photos to a common size and rotate and pad any camera rotated images")
     parser.add_option("-f","--file", dest="file", default="", help="Read image file paths from a file one full path per line")
-    parser.add_option("-m","--music", dest="music", default="", help="Read music chords from file")
     parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Log all activity to console")
-    parser.add_option("-d","--dontclean", dest="dontclean", action="store_true", default=False, help="Don't clean up intermediate files to allow for debugging")
-    parser.add_option("-x","--width", dest="width", default=320, type="int", help="Width of slide show (default 320)")
-    parser.add_option("-y","--height", dest="height", default=240, type="int", help="Height of slide show (default 240)")
-    parser.add_option("-r","--rate", dest="rate", default=1, type="int", help="Frame rate in frames per second (default 1)")
-    parser.add_option("-b","--bpm",dest="bpm",default="120",type="int", help="Beats per minute for tempo")
-    parser.add_option("-s","--swing",dest="swing",action="store_true", default=False, help="Swing the notes in the improvisation")
+    parser.add_option("-l","--labels", dest="labels", action="store_true", default=False, help="Put labels on images")
+    parser.add_option("-x","--width", dest="width", default=320, type="int", help="Width of each image (default 320)")
+    parser.add_option("-y","--height", dest="height", default=240, type="int",help="Height of each image (default 240)")
+    parser.add_option("-r","--rows", dest="rows", default= 6, type="int", help="Rows in contact sheet (default 6)")
+    parser.add_option("-c","--columns", dest="columns", default = 8, type="int", help="Columns in contact sheet (default 8)")
+    parser.add_option("-p","--path", dest="path", default=".", help="Output path for transformed images")
     
     (options,args) = parser.parse_args()
                            
