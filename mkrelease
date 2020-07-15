@@ -1,0 +1,43 @@
+#!/bin/bash -x
+#./runtests
+#if [ $? -ne 0 ]
+#then
+#    echo "Tests failed! Stopping release!"
+#    exit $?
+#fi
+version=$1
+echo $version >VERSION
+echo "__version__ = '$version'" >slides_sound/version.py
+file_version=${version//[\.]/_}
+if [ -f slides_sound_$file_version.zip ];
+    then rm slides_sound_$file_version.zip;
+fi
+./mkdocs
+zip_python () {
+    if [ -d $1 ];
+         then return;
+    elif [[ $1 == *.py ]];
+        then zip -q slides_sound_$2.zip $1;
+    elif [ `grep -c "\#\!.*python" $1` -eq 1 ];
+        then zip -q slides_sound_$2.zip $1;
+    fi
+}
+for f in {slides_sound,scripts}/*;
+do zip_python $f $file_version;
+done
+zip -q slides_sound_$file_version.zip docs/*
+for f in docs/{slides_sound,scripts}/*;
+do zip -q slides_sound_$file_version.zip $f;
+done
+zip -q slides_sound_$file_version.zip requirements.txt
+zip -q slides_sound_$file_version.zip LICENSE
+zip -q slides_sound_$file_version.zip README.md
+unzip -l slides_sound_$file_version.zip
+if [ -d dist ];
+    then rm -rf dist
+fi
+if [ -d build ];
+    then rm -rf build
+fi
+python3 -m pip install --upgrade setuptools wheel
+python3 setup.py sdist bdist_wheel
