@@ -3,6 +3,7 @@ import re
 import os
 import wave
 import math
+import fluidsynth as fl
 
 notes = {
 "C0":16.35,
@@ -365,10 +366,10 @@ def split_chord( name ):
         return (root,octave,type)
     else:
         return None
-        
+
 def join_chord( root, octave, type ):
     return root+str(octave)+type
-        
+
 def scale( name, transpose = 0, octaves = 1 ):
     m = re.match(scale_pat,name)
     if m:
@@ -386,7 +387,7 @@ def scale( name, transpose = 0, octaves = 1 ):
         return s
     else:
         return []
-            
+
 def closest_index_in_scale( note, scl ):
     idx = note_to_idx[note]
     sidx = 0
@@ -395,11 +396,11 @@ def closest_index_in_scale( note, scl ):
             return sidx
         sidx += 1
     return len(scl) / 2
-    
+
 def chord( name ):
     if name[0] == "[":
         return tuple(name[1:-1].split(","))
-        
+
     m = re.match(chord_pat,name)
     if m:
         root = note_to_idx[m.group(1)]
@@ -410,7 +411,7 @@ def chord( name ):
             s.append(idx_to_note[root % max_note_idx])
         return tuple(s)
     else:
-        return ()           
+        return ()
 
 value_to_beats = { 1.0:4.0, 1.5:6.0, 2.0:2.0, 2.5:3.0, 4.0:1.0, 4.5:1.5, 8.0:0.5, 8.5:0.75 }
 
@@ -419,7 +420,7 @@ def duration( tempo, value ):
     return bps * value_to_beats[float(value)]
 
 # name can be either a chord name like "C4Maj7" or
-# a list of notes [ "C4","E4","G4" ] or 
+# a list of notes [ "C4","E4","G4" ] or
 # a string formatted as "[C4,E4,G4]"
 class C:
     def __init__(self, name, value ):
@@ -428,13 +429,13 @@ class C:
         else:
             self.name = name
         self.value = value
-        
+
     def __repr__(self):
         return "C(\"%s\",%d)"%(self.name,self.value)
-        
+
     def notes( self ):
         return chord(self.name)
-        
+
 class N:
     def __init__(self, name, value ):
         self.name = name
@@ -442,15 +443,22 @@ class N:
 
     def __repr__(self):
         return "N(\"%s\",%d)"%(self.name,self.value)
-        
+
 class S:
     def __init__(self, name, value ):
         self.name = name
         self.value = value
-        
+
     def __repr__(self):
         return "S(\"%s\",%s)"%(self.name,str(self.value))
-        
+
+def total_time( chords, tempo ):
+    """ return the total time to play chord progression """
+    time = 0
+    for c in chords:
+        time += duration( tempo,c.value)
+    return time
+
 class Song:
     def __init__(self, swing, tempo, measure, beat, chords, melody=None, rhythm=None, song_time= 0, chord_voice = 0, melody_voice = 0, rhythm_voice = 0 ):
         self.swing = swing
@@ -464,54 +472,128 @@ class Song:
         self.melody_voice = melody_voice
         self.rhythm_voice = rhythm_voice
         if song_time:
-            time = 0
-            for c in chords:
-                time = time + duration( tempo, c.value )
-            chorus = int(math.ceil(float(song_time) / float(time)) )
-            if chorus > 0:
+            while total_time(self.chords,self.tempo) > song_time:
+                self.chords.pop(-1)
+            
+            chorus = float(song_time) / float(total_time(self.chords,self.tempo))
+            if chorus >= 2.0:
+                chorus = int(chorus)
                 self.chords = self.chords * chorus
                 if self.melody:
                     self.melody = self.melody * chorus
                 if self.rhythm:
-                    self.rhythm = self.rhythm * chorus  
+                    self.rhythm = self.rhythm * chorus
 
 # sample cache is keyed by (Note,Dynamic (p,mp,mf,f,ff)) and contains ( filename, sample ) if sample hasn't been loaded then sample is None
 sample_cache = {}
 voices =  {}
 
+def load_sample_from_file( filename, verbose=False ):
+    """ loads a sample directly from a wav file """
+    wf =wave.open(filename,"r")
+    samples = wf.readframes(wf.getnframes())
+    wf.close()
+    if verbose:
+        print("load_sample_from_file:",filename)
+    return samples
+
+def midi_note_to_table_idx( midi_note, midi_offset = 21, table_offset = 13 ):
+    """ compute the note table index of a midi note """
+    note_idx = table_offset
+    midi_note -= midi_offset
+    while midi_note:
+        note_idx += 1
+        if note_idx < len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+            note_idx += 1
+        midi_note -= 1
+    return note_idx
+
 def init_sample_cache( directory, voice = 0, midi_offset = 21, table_offset = 13, verbose = False ):
+    """ init sample cache from samples on disk """
     min_note_idx = 10000
     max_note_idx = 0
     for f in os.listdir( directory ):
         if f.endswith(".wav"):
             l = f.split("_")
             r = l[-1].split(".")
-            note = int(r[0])-midi_offset
-            note_idx = table_offset
-            while note:
-                note_idx += 1
-                if note_idx < len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
-                    note_idx += 1
-                note -= 1
+            note_idx  = midi_note_to_table_idx(int(r[0]),midi_offset,table_offset)
             if note_idx < min_note_idx:
                 min_note_idx = note_idx
             if note_idx > max_note_idx:
                 max_note_idx = note_idx
-            sample_cache[ (note_table[note_idx][0],l[2],voice) ] = ( os.path.join( directory, f), None )
+            sample_cache[ (note_table[note_idx][0],l[2],voice) ] = ( lambda directory=directory,f=f,verbose=verbose : load_sample_from_file(os.path.join( directory, f),verbose), None )
             if verbose:
                 print("stored",(note_table[note_idx][0],l[2],voice),( os.path.join( directory, f), None ))
             if note_idx < len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
                 note_idx += 1
-                sample_cache[ (note_table[note_idx][0],l[2],voice) ] = ( os.path.join( directory, f), None )
+                sample_cache[ (note_table[note_idx][0],l[2],voice) ] = (lambda directory=directory,f=f,verbose=verbose : load_sample_from_file( os.path.join( directory, f),verbose), None )
                 if note_idx < min_note_idx:
                     min_note_idx = note_idx
                 if note_idx > max_note_idx:
                     max_note_idx = note_idx
                 if verbose:
-                    print("stored",(note_table[note_idx][0],l[2],voice),( os.path.join( directory, f), None ))
+                    print("stored",(note_table[note_idx][0],l[2],voice),(os.path.join( directory, f), None ))
     voices[voice] = (min_note_idx, max_note_idx)
-     
-                
+
+def load_sample_from_sf( bank, preset, sf_path, note, dyn, verbose = False ):
+    """ load one sample from soundfont """
+    fs = fl.Synth()
+    fs.start()
+    sf = fs.sfload( sf_path )
+    fs.program_select(0,sf,bank,preset)
+    fs.cc(0,7,127)
+    time = duration( 120, 1 ) * 44100.0
+    decay = int(time/4.0)
+    attack = int(time) - decay
+    dyn_to_velocity = {"p":48,"mp":64,"mf":80,"f":96,"ff":112}
+    velocity = dyn_to_velocity[dyn]
+    fs.noteon(0,note,velocity)
+    attack_samples = fs.get_samples(attack)
+    fs.noteoff(0,note)
+    decay_samples = fs.get_samples(decay)
+    output_sample = bytearray(attack_samples)+bytearray(decay_samples)
+    fs.delete()
+    if verbose:
+        print("load_sample_from_sf:",bank,preset,sf_path,note,dyn)
+    return output_sample
+
+def find_default_soundfont():
+    """ look through /usr/share for the first thing ending with *.sf[2,3] """
+    for dirpath,dirnames,filenames in os.walk('/usr/share'):
+            for f in filenames:
+                if f.endswith(".sf2") or f.endswith(".sf3"):
+                    return "0:0:%s"%os.path.join(dirpath,f)
+    return ""
+
+def init_sample_cache_sf( bank, preset, sf_path, voice, midi_offset = 21, table_offset = 13, verbose = False):
+    """ init sample cache from soundfont """
+
+    if verbose:
+        print("initalizing cache for soundfont:",bank,preset,sf_path)
+
+    min_note_idx = 10000
+    max_note_idx = 0
+    for midi_note in range(21,108):
+        for dyn in ["p","mp","mf","f","ff"]:
+            note_idx = midi_note_to_table_idx(midi_note,midi_offset,table_offset)
+            sample_cache[ ( note_table[note_idx][0],dyn,voice ) ] = (lambda bank=bank,preset=preset,sf_path=sf_path,midi_note=midi_note,dyn=dyn,verbose=verbose: load_sample_from_sf( bank, preset, sf_path, midi_note, dyn, verbose ), None)
+            if verbose:
+                print("stored",(note_table[note_idx][0],dyn,voice),( "%d:%d:%d:%s"%(midi_note,bank,preset,sf_path), None ))
+            if note_idx < min_note_idx:
+                min_note_idx = note_idx
+            if note_idx > max_note_idx:
+                max_note_idx = note_idx
+            if note_idx < len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+                note_idx += 1
+                sample_cache[ (note_table[note_idx][0],dyn,voice) ] = (lambda bank=bank,preset=preset,sf_path=sf_path,midi_note=midi_note,dyn=dyn,verbose=verbose: load_sample_from_sf( bank, preset, sf_path, midi_note, dyn, verbose ), None )
+                if verbose:
+                    print("stored",(note_table[note_idx][0],dyn,voice),( "%d:%d:%d:%s"%(midi_note,bank,preset,sf_path), None ))
+                if note_idx < min_note_idx:
+                    min_note_idx = note_idx
+                if note_idx > max_note_idx:
+                    max_note_idx = note_idx
+    voices[voice] = (min_note_idx,max_note_idx)
+
 def get_cached_sample ( name, dynamic,voice= 0,verbose = False ):
     while note_to_idx[name] < voices[voice][0]:
         name = idx_to_note[note_to_idx[name]+12]
@@ -522,9 +604,7 @@ def get_cached_sample ( name, dynamic,voice= 0,verbose = False ):
             print("found",(name,dynamic,voice))
         ce = sample_cache[(name,dynamic,voice)]
         if ce[1] == None:
-            wf =wave.open(ce[0],"r")
-            samples = wf.readframes(wf.getnframes())
-            wf.close()
+            samples = ce[0]()
             sample_cache[(name,dynamic,voice)] = (ce[0],samples)
             return samples
         else:
@@ -533,7 +613,7 @@ def get_cached_sample ( name, dynamic,voice= 0,verbose = False ):
         if verbose:
             print("not found",(name,dynamic,voice))
         return None
-            
+
 
 if __name__ == '__main__':
     init_sample_cache( "/home/james/Downloads/ssamples" )

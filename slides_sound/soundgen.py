@@ -1,7 +1,7 @@
 #!/usr/bin/python -u
 import math
 import wave
-from .notes import notes, scale, chord, C, N, S, Song, duration, chord2scales, split_chord, join_chord, init_sample_cache, get_cached_sample, closest_index_in_scale
+from .notes import notes, scale, chord, C, N, S, Song, duration, chord2scales, split_chord, join_chord, init_sample_cache, init_sample_cache_sf, find_default_soundfont, get_cached_sample, closest_index_in_scale
 import time
 import re
 import random
@@ -28,6 +28,26 @@ def unpack_sample( s ):
     up = wave.struct.unpack_from('%dh'%sl,s,0)
     us = [float(sv) for sv in up]
     return us
+
+def unpack_channels( s ):
+    up = unpack_sample(s)
+    left = []
+    right = []
+    idx = 0
+    while idx < len(up)-1:
+        left.append(up[idx])
+        right.append(up[idx+1])
+        idx += 2
+    return left,right
+
+def pack_channels( left, right ):
+    idx = 0
+    both = []
+    while idx < len(left):
+        both.append(left[idx])
+        both.append(right[idx])
+        idx += 1
+    return pack_sample(both)
 
 def pack_sample( s ):
     sample = bytearray(len(s)*2)
@@ -69,15 +89,34 @@ def mix_sample( sa, sb, max_amp = global_max_amp):
 def balance( sa, lpa, rpa, sb, lpb, rpb, max_amp = global_max_amp ):
     ua = unpack_sample(sa)
     ub = unpack_sample(sb)
-    sal = scale_sample(ua, lpa)
-    sar = scale_sample(ua, rpa)
-    sbl = scale_sample(ub, lpb)
-    sbr = scale_sample(ub, rpb)
-    ls = sum_samples(sal,sbl)
-    rs = sum_samples(sar,sbr)
-    ml = max_sample(ls)
-    mr = max_sample(rs)
-    return ( pack_sample(scale_sample(ls,max_amp/ml)), pack_sample(scale_sample(rs,max_amp/mr)) )
+    out_len = min(len(ua)-1,len(ub)-1)
+    idx = 0
+    while idx < out_len:
+        ua[idx] = ua[idx] * lpa
+        ua[idx+1] = ua[idx+1] * rpa
+        idx += 2
+    idx = 0
+    while idx < out_len:
+        ub[idx] = ub[idx] * lpa
+        ub[idx+1] = ub[idx+1] * rpa
+        idx += 2
+    idx = 0
+    ml = 0
+    mr = 0
+    while idx < out_len:
+        ua[idx] = ua[idx] + ub[idx]
+        ua[idx+1] = ua[idx+1] + ub[idx+1]
+        if math.fabs(ua[idx]) > ml:
+            ml = math.fabs(ua[idx])
+        if math.fabs(ua[idx+1]) > mr:
+            mr = math.fabs(ua[idx+1])
+        idx += 2
+    idx = 0
+    while idx < out_len:
+        ua[idx] = ua[idx] * max_amp/ml
+        ua[idx+1] = ua[idx+1] * max_amp/mr
+        idx += 2
+    return pack_sample(ua)
 
 def reverb( sa, delay = 0.05, sr = 44100.0, max_amp = global_max_amp ):
     delay_samples = int(sr*delay)
@@ -125,7 +164,7 @@ note_cache = {}
 def gen_note( note = "C4", sr = 44100.0, t = 5.0, max_amp = global_max_amp, dyn = "f", voice = 0 ):
 
     freq = notes[note]
-    total_samples = sr*t
+    total_samples = (sr*t)
     period = sr / freq
     natural_freq = 2.0*math.pi/period
 
@@ -138,12 +177,12 @@ def gen_note( note = "C4", sr = 44100.0, t = 5.0, max_amp = global_max_amp, dyn 
     if max_amp > 0.0:
         cs = get_cached_sample( note, dyn, voice, verbose )
         if cs:
-            nc = int(total_samples)*2
+            nc = int(total_samples)*4
             ls = len(cs)
             if nc > ls:
                 output_signal = cs + (wave.struct.pack('h',0) * ((nc-ls)//2))
             else:
-                output_signal = smooth_decay(cs[:int(total_samples)*2])
+                output_signal = smooth_decay(cs[:nc])
         else:
             envelope = gen_envelope( max_amp, sr, t )
             #evaluate x-axis / time-axis positions
@@ -171,7 +210,7 @@ def gen_chord( name = "C4Maj", sr = 44100.0, t = 5.0, max_amp = global_max_amp, 
             print("Using cached chord",key)
         return chord_cache[key]
     tones = chord(name)
-    signal = ''
+    signal = b''
     for tn in tones:
         if not signal:
             signal = gen_note(tn,sr,t,max_amp,dyn,voice)
@@ -376,7 +415,7 @@ def improvise_scale_phrase( chords, note_idx=8, note_dir=1, harm=False, transpos
         cidx += 1
     return((melody,note_idx,note_dir))
 
-def improvise_melody_phrase( chords, melody, harm = False ):
+def improvise_melody_phrase( chords, melody, transpose=1, harm = False ):
     cidx = 0
     midx = 0
     phrase = []
@@ -384,7 +423,7 @@ def improvise_melody_phrase( chords, melody, harm = False ):
     chord_total_eighths = 0
     while midx < len(melody):
         scl_name = random.choice(chord2scales(chords[cidx].name))
-        scl = scale(scl_name,transpose=0,octaves=3)
+        scl = scale(scl_name,transpose=transpose,octaves=3)
         if melody[midx].name == 'R':
             phrase.append(melody[midx])
         elif harm:
@@ -431,16 +470,13 @@ def improvise_ex( song, transpose = 1, delta_gen = None ):
     note_dir = 1
     harm = False
 
-    song_eighths = 0
-    while cidx < len(song.chords):
-        song_eighths += value_to_eighths[song.chords[cidx].value]
-        cidx += 1
+    song_eighths = sum_eighths(song.chords)
     cidx = 0
 
-    while cidx < len(song.chords):
+    while cidx < len(song.chords) and total_eighths < song_eighths:
         chord_phrase = []
         chord_phrase_eighths = 0
-        while cidx < len(song.chords) and chord_phrase_eighths < phrase_eighths:
+        while cidx < len(song.chords) and chord_phrase_eighths < phrase_eighths and total_eighths+chord_phrase_eighths < song_eighths:
             chord_phrase.append(song.chords[cidx])
             chord_phrase_eighths += value_to_eighths[song.chords[cidx].value]
             cidx += 1
@@ -454,7 +490,7 @@ def improvise_ex( song, transpose = 1, delta_gen = None ):
 
         harm = (random.randint(1,10) < 5)
         if melody_phrase and (random.randint(1,10) < 5 or total_eighths < phrase_eighths or total_eighths >= song_eighths-phrase_eighths):
-            phrase = improvise_melody_phrase( chord_phrase, melody_phrase, harm )
+            phrase = improvise_melody_phrase( chord_phrase, melody_phrase,transpose, harm )
         else:
             phrase,note_idx,note_dir = improvise_scale_phrase( chord_phrase, note_idx, note_dir, harm, transpose, delta_gen, ending = ( cidx >= (len(song.chords)-8)) )
 
@@ -510,12 +546,17 @@ def arpegiate_ex( song, transpose = -1 ):
     punch_chord = False
     play_chord = False
     phrase_time = 0
-    while cidx < len(song.chords):
+    total_eighths = 0
+    song_eighths = sum_eighths(song.chords)
+    cidx = 0
+
+    while cidx < len(song.chords) and total_eighths < song_eighths:
         c = song.chords[cidx]
         cc = c.name
         root,octave,type = split_chord(cc)
         cp = join_chord(root,octave+transpose,type)
         eighths = value_to_eighths[c.value]
+        total_eighths += eighths
 
         if not phrase_time:
             play_chord = (random.randint(1,10) <= 2)
@@ -673,15 +714,9 @@ def play_song( s, out_file = "soundgen.wav" ):
 #    save_sample(chords_n_bass,"chordsnbass.wav",1)
     if verbose:
         print("Balancing Channels")
-    ls,rs = balance( bass_line, 0.60, 0.40, melody_line, 0.40, 0.60 )
+    output = balance( bass_line, 0.60, 0.40, melody_line, 0.40, 0.60 )
     if verbose:
         print("Saving song")
-    idx = 0
-    out_len = min(len(ls),len(rs))
-    output = bytearray(out_len*4)
-    while idx < out_len:
-        wave.struct.pack_into("BBBB",output,idx*4,ls[idx],ls[idx+1],rs[idx],rs[idx+1])
-        idx += 2
     save_sample(output,out_file,2)
 
 class DeltaGenerator:

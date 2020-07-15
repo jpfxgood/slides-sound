@@ -3,7 +3,7 @@
 # This is a tool to create improvised music based on chord progression, and/or melody and ryththm
 from slides_sound import soundgen
 from slides_sound import notes
-from slides_sound.soundgen import init_sample_cache,improvise_ex,DeltaGenerator,arpegiate_ex,play_song,load_music
+from slides_sound.soundgen import init_sample_cache,init_sample_cache_sf,find_default_soundfont,improvise_ex,DeltaGenerator,arpegiate_ex,play_song,load_music
 from slides_sound.notes import Song, C, N, S
 from optparse import OptionParser
 import traceback
@@ -11,7 +11,6 @@ import sys
 import random
 import pprint
 import os
-import pkg_resources
 
 def main(options, args):
     """ The main driver for the music utility """
@@ -26,15 +25,6 @@ def main(options, args):
     soundgen.set_verbose(options.verbose)
     soundgen.set_debug(options.debug)
 
-    if not options.samples:
-        samples = pkg_resources.resource_filename("slides_sound","samples/ssamples/")
-        if os.path.exists(samples):
-            options.samples = [samples]
-
-    if not options.samples:
-        print("No samples please use the -S/--samples option")
-        return 1
-
     voice = 0
     for sample_path in options.samples:
         params = sample_path.split(",")
@@ -46,6 +36,20 @@ def main(options, args):
             if options.verbose:
                 print("loading",sample_path, voice)
             init_sample_cache(params[0],voice,int(params[1]),int(params[2]),verbose=options.verbose)
+        voice += 1
+
+    if voice == 0 and not options.soundfonts:
+        default_soundfont = find_default_soundfont()
+        if default_soundfont:
+            options.soundfonts.append(default_soundfont)
+
+    if not options.soundfonts and not options.samples:
+        print("You need to specify either --samples or --soundfonts we couldn't find a default to use")
+        return(1)
+
+    for sound_font in options.soundfonts:
+        bank,preset,sf_path = sound_font.split(":",2)
+        init_sample_cache_sf(int(bank),int(preset),sf_path,voice,verbose=options.verbose)
         voice += 1
 
     if options.deltas:
@@ -156,8 +160,9 @@ if __name__ == '__main__':
     parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Log all activity to console")
     parser.add_option("-D","--debug", dest="debug", action="store_true", default=False, help="save debug versions of the parts")
     parser.add_option("-S","--samples", dest="samples", default = [], action="append", help="Add path to additional voice with samples")
+    parser.add_option("-f","--soundfonts", dest="soundfonts", default= [], action="append", help="Add soundfont to use for a voice, format is {bank number}:{preset number}:{full path to soundfont} will default to 0:0:{first soundfont we find}")
     parser.add_option("-V","--voices", dest="voices", default="0,0,0", help="Voice numbers {chord_voice},{melody_voice},{rhythm_voice}")
-    parser.add_option("-T","--transpose", dest="transpose", default="0,0,0", help="Transapose voices {chord_transpose},{melody_transpose},{rhythm_transpose}")
+    parser.add_option("-T","--transpose", dest="transpose", default="1,1,-1", help="Transpose voices {chord_transpose},{melody_transpose},{rhythm_transpose}")
 
 
     (options,args) = parser.parse_args()
@@ -167,6 +172,8 @@ if __name__ == '__main__':
     except:
         tb = traceback.format_exc()
         print(tb, file=sys.stderr)
+        sys.stdout.flush()
+        sys.stderr.flush()
         exit(1)
 
     exit(ret)
