@@ -85,8 +85,8 @@ def main(options, args):
         sheet = 0
         row = 0
         column = 0
-        sheet_width = options.columns * options.width
-        sheet_height = options.rows * options.height
+        sheet_width = (options.columns * options.width)+(2*options.bleed)
+        sheet_height = (options.rows * options.height)+(2*options.bleed)
         sheet_image = None
         fnt = ImageFont.load_default()
         for (i,f) in frames:
@@ -94,7 +94,10 @@ def main(options, args):
             if not sheet_image:
                 sheet_image = Image.new( img.mode, (int(sheet_width),int(sheet_height)), "black")
                 drw =  ImageDraw.Draw(sheet_image)
-            sheet_image.paste(img, (column*options.width, row*options.height))
+
+            img_x = (column*options.width)+options.bleed
+            img_y = (row*options.height)+options.bleed
+            sheet_image.paste(img, (img_x, img_y))
             if options.labels:
                 txt_width,txt_height = drw.textsize(i,font=fnt)
                 j = None
@@ -102,24 +105,24 @@ def main(options, args):
                     j = i[len(i)/2:]
                     i = i[:len(i)/2]
                     txt_width,txt_height = drw.textsize(i,font=fnt)
-                drw.rectangle([(column*options.width,row*options.height),((column*options.width)+txt_width,(row*options.height)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
-                drw.text((column*options.width,row*options.height),i,font=fnt,fill=(255,255,255,255))
+                drw.rectangle([(img_x,img_y),((img_x)+txt_width,(img_y)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                drw.text((img_x,img_y),i,font=fnt,fill=(255,255,255,255))
                 if j:
                     txt_width,txt_height = drw.textsize(j,font=fnt)
-                    drw.rectangle([(column*options.width,(row*options.height)+txt_height),((column*options.width)+txt_width,(row*options.height)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
-                    drw.text((column*options.width,(row*options.height)+txt_height),j,font=fnt,fill=(255,255,255,255))
+                    drw.rectangle([(img_x,(img_y)+txt_height),((img_x)+txt_width,(img_y)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                    drw.text((img_x,(img_y)+txt_height),j,font=fnt,fill=(255,255,255,255))
 
             column = column + 1
-            if column > options.columns:
+            if column >= options.columns:
                 column = 0
                 row = row + 1
-            if row > options.rows:
+            if row >= options.rows:
                 row = 0
                 sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
                 sheet = sheet + 1
                 sheet_image = None
         if sheet_image:
-            sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
+            sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet), dpi=(options.dpi,options.dpi))
 
     if options.verbose:
         print("Done")
@@ -135,6 +138,8 @@ if __name__ == '__main__':
     parser.add_option("-r","--rows", dest="rows", default= 6, type="int", help="Rows in contact sheet (default 6)")
     parser.add_option("-c","--columns", dest="columns", default = 8, type="int", help="Columns in contact sheet (default 8)")
     parser.add_option("-p","--path", dest="path", default=".", help="Output path for transformed images")
+    parser.add_option("-b","--bleed", dest="bleed", default=18, type="int", help="Bleed around each page in pixels")
+    parser.add_option("-d","--dpi", dest="dpi", default=72, type="int", help="Set DPI for output images")
 
     (options,args) = parser.parse_args()
 
