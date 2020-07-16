@@ -1,7 +1,7 @@
 #!/usr/bin/python -u
 import math
 import wave
-from .notes import notes, scale, chord, C, N, S, Song, duration, chord2scales, split_chord, join_chord, init_sample_cache, init_sample_cache_sf, find_default_soundfont, get_cached_sample, closest_index_in_scale
+from .notes import notes, scale, chord, C, N, S, Song, duration, chord2scales, split_chord, join_chord, init_sample_cache, init_sample_cache_sf, find_default_soundfont, get_cached_sample, closest_index_in_scale, total_time
 import time
 import re
 import random
@@ -15,6 +15,56 @@ verbose = False
 debug = False
 random.seed()
 
+value_to_eighths = {
+    1.5:12,
+    1:8,
+    2.5:6,
+    2:4,
+    4.5:3,
+    4:2,
+    8:1
+    }
+
+eighths_to_value = {
+    12:1.5,
+    8:1,
+    6:2.5,
+    4:2,
+    3:4.5,
+    2:4,
+    1:8
+    }
+
+note_lengths = [0,8,8,8,4,4,4,2,1]
+times = [0,1,1,1,2,2,2,4,8]
+bass_note_lengths = [0,8,4,4,4,2,2,2,1]
+bass_times = [0,1,2,2,2,4,4,4,8]
+
+
+class DeltaGenerator:
+    def __init__(self, deltas = [] ):
+        self.deltas = deltas
+        self.didx = 0
+
+    def getDelta( self ):
+        delta = 0
+        if self.deltas:
+            delta = self.deltas[self.didx]
+            self.didx = self.didx + 1
+            if self.didx >= len(self.deltas):
+                self.didx = 0
+        return delta
+
+def sum_eighths( line ):
+    eighths = 0
+    for s in line:
+        eighths += value_to_eighths[s.value]
+    return eighths
+
+def load_music( music_file ):
+    s = open(music_file,"r").read()
+    return eval(s)
+
 def set_verbose( vb ):
     global verbose
     verbose = vb
@@ -22,6 +72,12 @@ def set_verbose( vb ):
 def set_debug( db ):
     global debug
     debug = db
+
+def save_sample ( output, fname, channels ):
+    out_file = wave.open(fname,"w")
+    out_file.setparams((channels,2,44100,len(output)//2,"NONE","noncompressed"))
+    out_file.writeframes(output)
+    out_file.close()
 
 def unpack_sample( s ):
     sl = len(s)//2
@@ -223,7 +279,7 @@ def gen_chord( name = "C4Maj", sr = 44100.0, t = 5.0, max_amp = global_max_amp, 
     return signal
 
 def gen_line( line, tempo = 120, add_swing = False, dyn = "f",voice=0 ):
-    total_time = 0.0
+    tt_time = 0.0
     output = b''
     swing = 0.0
     dyns = [ "ff","f","mf","f","ff"]
@@ -251,103 +307,16 @@ def gen_line( line, tempo = 120, add_swing = False, dyn = "f",voice=0 ):
                 output += gen_note( note=nn, t = tn, dyn=cur_dyn, voice = voice)
             eidx += 1
 
-        total_time += tn
+        tt_time += tn
         swing = -swing
         if random.randint(1,10) <= 4:
             dyn_idx += 1
             if dyn_idx >= len(dyns):
                 dyn_idx = 0
     if verbose:
-        print("gen_line, total_time",total_time)
+        print("gen_line, total_time",tt_time)
+        print("calculated total_time",total_time(line,tempo))
     return output
-
-
-value_to_eighths = {
-    1.5:12,
-    1:8,
-    2.5:6,
-    2:4,
-    4.5:3,
-    4:2,
-    8:1
-    }
-
-eighths_to_value = {
-    12:1.5,
-    8:1,
-    6:2.5,
-    4:2,
-    3:4.5,
-    2:4,
-    1:8
-    }
-
-note_lengths = [0,8,8,8,4,4,4,2,1]
-times = [0,1,1,1,2,2,2,4,8]
-bass_note_lengths = [0,8,4,4,4,2,2,2,1]
-bass_times = [0,1,2,2,2,4,4,4,8]
-
-def sum_eighths( line ):
-    eighths = 0
-    for s in line:
-        eighths += value_to_eighths[s.value]
-    return eighths
-
-def improvise( chords, transpose = 1 ):
-    phrase_cache = {}
-    melody = []
-    note_idx = 8
-    note_dir = 1
-    for c in chords:
-        root,octave,type = split_chord(c.name)
-        cname = join_chord(root,octave+transpose,type)
-        if ((cname,c.value) in phrase_cache) and (random.randint(1,2) == 2):
-            melody += phrase_cache[(cname,c.value)]
-            continue
-
-        scl_name = random.choice(chord2scales(cname))
-        scl = scale(scl_name,transpose=-1,octaves=3)
-        eighths = value_to_eighths[c.value]
-        if note_idx >= len(scl):
-            note_idx = len(scl)-2
-            note_dir = -1
-        if random.randint(1,10) <= 2:
-            note_dir = -note_dir
-        phrase = []
-        note_len = 0
-        harm = (random.randint(1,10) <= 4)
-        while ( eighths > 0 ):
-            if (not note_len) or (note_len > eighths):
-                note_len = random.randint(1,eighths)
-
-            rest = ( random.randint(1,10) <= 2)
-            if rest:
-                nn = N('R',note_lengths[note_len])
-            elif harm:
-                chord = []
-                chord_len = random.randint(2,3)
-                cn_idx = note_idx
-                while chord_len >= 0 and cn_idx >= 0:
-                    chord.append(scl[cn_idx])
-                    chord_len -= 1
-                    cn_idx -= 2
-                nn = C(chord,note_lengths[note_len])
-            else:
-                nn = N(scl[note_idx],note_lengths[note_len])
-            melody.append(nn)
-            phrase.append(nn)
-            eighths -= times[note_len]
-            note_idx += note_dir
-            if note_idx < 0:
-                note_idx = 1
-                note_dir = 1
-            elif note_idx >= len(scl):
-                note_idx = len(scl)-2
-                note_dir = -1
-            if not eighths:
-                note_dir = -note_dir
-        phrase_cache[(cname,c.value)] = phrase
-    return(melody)
 
 def improvise_scale_phrase( chords, note_idx=8, note_dir=1, harm=False, transpose = 1, delta_gen = None, ending = False ):
     melody = []
@@ -461,7 +430,6 @@ def improvise_melody_phrase( chords, melody, transpose=1, harm = False ):
     return phrase
 
 def improvise_ex( song, transpose = 1, delta_gen = None ):
-    total_eighths = 0
     phrase_eighths = (value_to_eighths[song.beat] * song.measure) * phrase_measures
     cidx = 0
     midx = 0
@@ -470,63 +438,41 @@ def improvise_ex( song, transpose = 1, delta_gen = None ):
     note_dir = 1
     harm = False
 
-    song_eighths = sum_eighths(song.chords)
+    line_time = 0
     cidx = 0
 
-    while cidx < len(song.chords) and total_eighths < song_eighths:
+    while cidx < len(song.chords) and line_time < song.song_time:
         chord_phrase = []
         chord_phrase_eighths = 0
-        while cidx < len(song.chords) and chord_phrase_eighths < phrase_eighths and total_eighths+chord_phrase_eighths < song_eighths:
+        chord_phrase_time = 0
+        while cidx < len(song.chords) and chord_phrase_eighths < phrase_eighths and line_time+chord_phrase_time < song.song_time:
             chord_phrase.append(song.chords[cidx])
             chord_phrase_eighths += value_to_eighths[song.chords[cidx].value]
+            chord_phrase_time = total_time(chord_phrase,song.tempo)
             cidx += 1
         melody_phrase = []
         melody_phrase_eighths = 0
+        melody_phrase_time = 0
         if song.melody:
-            while midx < len(song.melody) and melody_phrase_eighths < phrase_eighths:
+            while midx < len(song.melody) and melody_phrase_eighths < phrase_eighths and line_time+melody_phrase_time < song.song_time:
                 melody_phrase.append(song.melody[midx])
                 melody_phrase_eighths += value_to_eighths[song.melody[midx].value]
+                melody_phrase_time = total_time(melody_phrase)
                 midx += 1
 
+        phrase = []
         harm = (random.randint(1,10) < 5)
-        if melody_phrase and (random.randint(1,10) < 5 or total_eighths < phrase_eighths or total_eighths >= song_eighths-phrase_eighths):
+        if melody_phrase and (random.randint(1,10) < 5):
             phrase = improvise_melody_phrase( chord_phrase, melody_phrase,transpose, harm )
-        else:
+        elif chord_phrase:
             phrase,note_idx,note_dir = improvise_scale_phrase( chord_phrase, note_idx, note_dir, harm, transpose, delta_gen, ending = ( cidx >= (len(song.chords)-8)) )
 
         melody += phrase
-        total_eighths += chord_phrase_eighths
+        line_time = total_time(melody,song.tempo)
 
     if verbose:
         print("improvise_ex:",melody)
     return melody
-
-def arpegiate( chords, transpose = -1 ):
-    line = []
-    phrase_cache = {}
-    for c in chords:
-        if ((c.name,c.value) in phrase_cache) and (random.randint(1,2) == 2):
-            line += phrase_cache[(c.name,c.value)]
-            continue
-        root,octave,type = split_chord(c.name)
-        cp = join_chord(root,octave+transpose,type)
-        eighths = value_to_eighths[c.value]
-        cn = chord(cp)
-        idx = 0
-        phrase = []
-        while ( eighths > 0 ):
-            if idx >= len(cn):
-                idx = 0
-            note_len = random.randint(1,eighths)
-            nn = cn[idx]
-            if idx and random.randint(1,10) <= 2:
-                nn = "R"
-            line.append(N(nn,bass_note_lengths[note_len]))
-            phrase.append(N(nn,bass_note_lengths[note_len]))
-            eighths -= bass_times[note_len]
-            idx += 1
-        phrase_cache[(c.name,c.value)] = phrase
-    return line
 
 def arpegiate_ex( song, transpose = -1 ):
     phrase_eighths = value_to_eighths[song.beat] * song.measure * phrase_measures
@@ -546,17 +492,15 @@ def arpegiate_ex( song, transpose = -1 ):
     punch_chord = False
     play_chord = False
     phrase_time = 0
-    total_eighths = 0
-    song_eighths = sum_eighths(song.chords)
+    line_time = 0
     cidx = 0
 
-    while cidx < len(song.chords) and total_eighths < song_eighths:
+    while cidx < len(song.chords) and line_time < song.song_time:
         c = song.chords[cidx]
         cc = c.name
         root,octave,type = split_chord(cc)
         cp = join_chord(root,octave+transpose,type)
         eighths = value_to_eighths[c.value]
-        total_eighths += eighths
 
         if not phrase_time:
             play_chord = (random.randint(1,10) <= 2)
@@ -613,82 +557,16 @@ def arpegiate_ex( song, transpose = -1 ):
                 eighths -= bass_times[note_len]
                 idx += 1
                 phrase_index += 1
-
+        line_time = total_time(line,song.tempo)
         cidx += 1
     if verbose:
         print("arpegiate_ex:",line)
     return line
 
-def punch_chords( song, transpose = 0 ):
-    phrase_eighths = value_to_eighths[song.beat] * song.measure * 4
-    phrase_index = 0
-    phrase = []
-    for idx in range(0,3):
-        eighths = phrase_eighths // 4
-        while ( eighths > 0 ):
-            note_len = min(eighths,random.choice([1,2,4]))
-            if eighths < (phrase_eighths // 4) and (random.randint(1,10) <= 8):
-                phrase.append(-note_len)
-            else:
-                phrase.append(note_len)
-            eighths -= bass_times[note_len]
-    if verbose:
-        print("punch_chords:",phrase)
-    line = []
-    note_idx = 8
-    note_dir = 1
-    cidx = 0
-    while cidx < len(song.chords):
-        c = song.chords[cidx]
-        root,octave,type = split_chord(c.name)
-        cp = join_chord(root,octave+transpose,type)
-        eighths = value_to_eighths[c.value]
-        lay_out = False
-        while ( eighths > 0 ):
-            if phrase_index >= len(phrase):
-                phrase_index = 0
-
-            if phrase_index == 0:
-                lay_out = ( random.randint(1,10) < 4 )
-                if lay_out:
-                    if verbose:
-                        print("chords laying out")
-                else:
-                    if verbose:
-                        print("chords playing")
-
-            note_len = phrase[phrase_index]
-            nn = cp
-            if note_len < 0:
-                note_len = -note_len
-                nn = "R"
-
-            if lay_out:
-                nn = "R"
-            note_len = min(eighths, note_len)
-            line.append(C(nn,bass_note_lengths[note_len]))
-            eighths -= bass_times[note_len]
-            phrase_index += 1
-        cidx += 1
-    if verbose:
-        print("punch_chords:",line)
-    return line
-
-def save_sample ( output, fname, channels ):
-    out_file = wave.open(fname,"w")
-    out_file.setparams((channels,2,44100,len(output)//2,"NONE","noncompressed"))
-    out_file.writeframes(output)
-    out_file.close()
-
 def play_song( s, out_file = "soundgen.wav" ):
     if verbose:
         print("Phrase measures",phrase_measures)
-#    print "Synthesizing Chords"
-#    chords = punch_chords(s)
-#    chords = s.chords
-#    print "chord eighths =",sum_eighths(chords)
-#    chord_progression = gen_line( chords ,s.tempo, s.swing, "ff" )
-#    save_sample(chord_progression,"chords.wav",1)
+
     if verbose:
         print("Synthesizing Melody")
         print("melody eighths =",sum_eighths(s.melody))
@@ -708,31 +586,9 @@ def play_song( s, out_file = "soundgen.wav" ):
     bass_line = reverb(bass_line)
     if debug:
         save_sample(bass_line,"bassrv.wav",1)
-
-#    print "Mixing Chords and Bass"
-#    chords_n_bass = mix_sample(chord_progression, bass_line)
-#    save_sample(chords_n_bass,"chordsnbass.wav",1)
     if verbose:
         print("Balancing Channels")
     output = balance( bass_line, 0.60, 0.40, melody_line, 0.40, 0.60 )
     if verbose:
         print("Saving song")
     save_sample(output,out_file,2)
-
-class DeltaGenerator:
-    def __init__(self, deltas = [] ):
-        self.deltas = deltas
-        self.didx = 0
-
-    def getDelta( self ):
-        delta = 0
-        if self.deltas:
-            delta = self.deltas[self.didx]
-            self.didx = self.didx + 1
-            if self.didx >= len(self.deltas):
-                self.didx = 0
-        return delta
-
-def load_music( music_file ):
-    s = open(music_file,"r").read()
-    return eval(s)

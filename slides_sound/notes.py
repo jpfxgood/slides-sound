@@ -460,7 +460,8 @@ def total_time( chords, tempo ):
     return time
 
 class Song:
-    def __init__(self, swing, tempo, measure, beat, chords, melody=None, rhythm=None, song_time= 0, chord_voice = 0, melody_voice = 0, rhythm_voice = 0 ):
+    def __init__(self, swing, tempo, measure, beat, chords, melody=None, rhythm=None,
+         song_time= 0, chord_voice = 0, melody_voice = 0, rhythm_voice = 0 ):
         self.swing = swing
         self.tempo = tempo
         self.measure = measure
@@ -471,10 +472,11 @@ class Song:
         self.chord_voice = chord_voice
         self.melody_voice = melody_voice
         self.rhythm_voice = rhythm_voice
-        if song_time:
-            while total_time(self.chords,self.tempo) > song_time:
+        self.song_time = song_time
+        if self.song_time:
+            while total_time(self.chords,self.tempo) > self.song_time+duration( self.tempo,1.0):
                 self.chords.pop(-1)
-            
+
             chorus = float(song_time) / float(total_time(self.chords,self.tempo))
             if chorus >= 2.0:
                 chorus = int(chorus)
