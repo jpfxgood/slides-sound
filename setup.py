@@ -33,7 +33,6 @@ setup(
     ],
     scripts=[
         'scripts/contact_sheet',
-        'scripts/convertsf',
         'scripts/list_soundfont',
         'scripts/music',
         'scripts/rotate_resize',
