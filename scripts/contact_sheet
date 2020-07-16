@@ -126,7 +126,7 @@ def main(options, args):
     return 0
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] [path with wildcard to the images]", description="A tool to resize all photos to a common size and rotate and pad any camera rotated images")
+    parser = OptionParser(usage="usage: %prog [options] [path with wildcard to the images]", description="A tool to resize all photos to a common size and rotate and pad any camera rotated images and create a series of contact sheets as .jpg files")
     parser.add_option("-f","--file", dest="file", default="", help="Read image file paths from a file one full path per line")
     parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Log all activity to console")
     parser.add_option("-l","--labels", dest="labels", action="store_true", default=False, help="Put labels on images")
