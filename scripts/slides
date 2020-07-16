@@ -12,6 +12,7 @@ from PIL.ExifTags import TAGS
 import subprocess
 from multiprocessing import Pool
 from slides_sound.slides_util import cmpfile,run,saferemove
+from tempfile import TemporaryDirectory
 
 def process_frame( img_name, out_frame, width, height, verbose = False ):
     try:
@@ -86,47 +87,59 @@ def main(options, args):
     else:
         slides = sorted(args,key=lambda x: cmpfile(x))
 
-    p = Pool(10)
-    frame_idx = 0
-    for img_name in slides:
-        p.apply_async(process_frame,( img_name,"frame%05d.jpg"%frame_idx,options.width, options.height, options.verbose ))
-        frame_idx += 1
-    p.close()
-    p.join()
+    with TemporaryDirectory() as tempdir:
+        p = Pool(10)
+        frame_idx = 0
+        for img_name in slides:
+            p.apply_async(process_frame,( img_name,os.path.join(tempdir,"frame%05d.jpg"%frame_idx),options.width, options.height, options.verbose ))
+            frame_idx += 1
+        p.close()
+        p.join()
 
-    slideshow_name = time.strftime("slideshow%Y%m%d%H%M%S.mp4")
-    saferemove(slideshow_name)
-    cmd = "ffmpeg -r %d -i frame%%05d.jpg -r 24 -vsync cfr -s %dx%d %s"%(int(options.rate),int(options.width),int(options.height),slideshow_name)
-    if options.verbose:
-        print("Generating %s: "%slideshow_name, cmd)
-    run(cmd)
-
-    if not options.dontclean:
+        slideshow_basename = time.strftime("slideshow%Y%m%d%H%M%S.mp4")
+        slideshow_name = os.path.join(options.path,slideshow_basename)
+        saferemove(slideshow_name)
+        cmd = "ffmpeg -r %d -i %s/frame%%05d.jpg -r 24 -vsync cfr -s %dx%d %s"%(int(options.rate),tempdir,int(options.width),int(options.height),slideshow_name)
         if options.verbose:
-            print("Cleaning up frames and writing deltas")
+            print("Generating %s: "%slideshow_name, cmd)
+        run(cmd,verbose = options.verbose)
 
-        saferemove("deltas.dat")
+        if options.verbose:
+            print("Writing deltas")
+
+        saferemove(os.path.join(options.path,"deltas.dat"))
         for fx in range(0,frame_idx):
-            saferemove("frame%05d.jpg"%fx)
-            dlts = open("frame%05d.jpg.dat"%fx,"r").read()
-            open("deltas.dat","a").write(dlts)
-            saferemove("frame%05d.jpg.dat"%fx)
+            dlts = open(os.path.join(tempdir,"frame%05d.jpg.dat"%fx),"r").read()
+            open(os.path.join(options.path,"deltas.dat"),"a").write(dlts)
 
-    if options.music:
-        cmd = os.path.join(os.path.dirname(__file__),"music")+" -c %s -t %d -d %s -o %s -b %d %s"%(options.music,(frame_idx-1)/int(options.rate),"deltas.dat","./music.wav",options.bpm,("-s" if options.swing else ""))
-        if options.samples:
-            cmd += " "+" ".join(["-S %s"%s for s in options.samples])
-        if options.verbose:
-            print("Generating music.wav: ", cmd)
-        run(cmd)
+        if options.music:
+            saferemove(os.path.join(options.path,"music.wav"))
+            cmd = os.path.join(os.path.dirname(__file__),"music")+" -c %s -t %d -d %s -o %s -b %d %s"%(
+                options.music,
+                (frame_idx-1)/int(options.rate),
+                os.path.join(options.path,"deltas.dat"),
+                os.path.join(options.path,"music.wav"),
+                options.bpm,
+                ("-s" if options.swing else ""))
+            if options.samples:
+                cmd += " "+" ".join(["-S %s"%s for s in options.samples])
+            if options.soundfonts:
+                cmd += " "+" ".join(["-f %s"%s for s in options.soundfonts])
+            if options.verbose:
+                cmd += " -v"
+                print("Generating music.wav: ", cmd)
+            run(cmd,verbose= options.verbose)
 
-        slideshow_plus_name = "plus_"+slideshow_name
-        saferemove(slideshow_plus_name)
+            slideshow_plus_name = os.path.join(options.path,"plus_"+slideshow_basename)
+            saferemove(slideshow_plus_name)
 
-        cmd = "avconv -i %s -i music.wav -shortest %s"%(slideshow_name,slideshow_plus_name)
-        if options.verbose:
-            print("Merging music into %s: "%slideshow_plus_name, cmd)
-        run(cmd)
+            cmd = "ffmpeg -i %s -i %s -shortest %s"%(slideshow_name,os.path.join(options.path,"music.wav"),slideshow_plus_name)
+            if options.verbose:
+                cmd += " -v 40"
+                print("Merging music into %s: "%slideshow_plus_name, cmd)
+            run(cmd,verbose=options.verbose)
+            saferemove(slideshow_name)
+            saferemove(os.path.join(options.path,"music.wav"))
 
     if options.verbose:
         print("Done")
@@ -137,13 +150,14 @@ if __name__ == '__main__':
     parser.add_option("-f","--file", dest="file", default="", help="Read image file paths from a file one full path per line")
     parser.add_option("-m","--music", dest="music", default="", help="Read music chords from file")
     parser.add_option("-v","--verbose", dest="verbose", action="store_true", default=False, help="Log all activity to console")
-    parser.add_option("-d","--dontclean", dest="dontclean", action="store_true", default=False, help="Don't clean up intermediate files to allow for debugging")
     parser.add_option("-x","--width", dest="width", default=320, type="int", help="Width of slide show (default 320)")
     parser.add_option("-y","--height", dest="height", default=240, type="int", help="Height of slide show (default 240)")
     parser.add_option("-r","--rate", dest="rate", default=1, type="int", help="Frame rate in frames per second (default 1)")
     parser.add_option("-b","--bpm",dest="bpm",default="120",type="int", help="Beats per minute for tempo")
     parser.add_option("-s","--swing",dest="swing",action="store_true", default=False, help="Swing the notes in the improvisation")
     parser.add_option("-S","--samples", dest="samples", default = [], action="append", help="Add path to additional voice with samples")
+    parser.add_option("-F","--soundfont", dest="soundfonts", default = [], action="append", help="Add path to additional voice with soundfont")
+    parser.add_option("-p","--path", dest="path", default=".", help="Output path for generated slideshow.")
 
     (options,args) = parser.parse_args()
 

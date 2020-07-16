@@ -14,7 +14,7 @@ def cmpfile( file1 ):
         num1 = m1.groups()[1]
         return "%20.20s%20.20s"%(base1,num1)
 
-def run( cmd, raiseException = True ):
+def run( cmd, raiseException = True, verbose = False ):
     p = subprocess.Popen(cmd,
                    shell=True,
                    bufsize=1024,
@@ -24,6 +24,9 @@ def run( cmd, raiseException = True ):
     result = p.wait()
     if result and raiseException:
         raise Exception(cmd,output,result)
+    if verbose:
+        print("Result:",result)
+        print(output)
     return result
 
 def saferemove( fname ):

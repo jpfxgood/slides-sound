@@ -11,6 +11,7 @@ from PIL.ExifTags import TAGS
 import subprocess
 from multiprocessing import Pool
 from slides_sound.slides_util import cmpfile,run,saferemove
+from tempfile import TemporaryDirectory
 
 def process_frame( img_name, out_frame, width, height, verbose = False ):
     try:
@@ -64,61 +65,61 @@ def main(options, args):
     else:
         slides = sorted(args,key=lambda x: cmpfile(x))
 
-    p = Pool(10)
-    frame_idx = 0
-    frames = []
-    for img_name in slides:
-        while True:
-            out_name = "%s/frame%04d.jpg"%(options.path,frame_idx)
-            if os.path.exists( out_name ):
-                frame_idx += 1
-            else:
-                break
-        p.apply_async(process_frame,( img_name, out_name, options.width, options.height, options.verbose ))
-        frames.append((img_name, out_name))
-        frame_idx += 1
-    p.close()
-    p.join()
+    with TemporaryDirectory() as tempdir:
+        p = Pool(10)
+        frame_idx = 0
+        frames = []
+        for img_name in slides:
+            while True:
+                out_name = "%s/frame%04d.jpg"%(tempdir,frame_idx)
+                if os.path.exists( out_name ):
+                    frame_idx += 1
+                else:
+                    break
+            p.apply_async(process_frame,( img_name, out_name, options.width, options.height, options.verbose ))
+            frames.append((img_name, out_name))
+            frame_idx += 1
+        p.close()
+        p.join()
 
-    sheet = 0
-    row = 0
-    column = 0
-    sheet_width = options.columns * options.width
-    sheet_height = options.rows * options.height
-    sheet_image = None
-    fnt = ImageFont.load_default()
-    for (i,f) in frames:
-        img = Image.open(f,"r")
-        if not sheet_image:
-            sheet_image = Image.new( img.mode, (int(sheet_width),int(sheet_height)), "black")
-            drw =  ImageDraw.Draw(sheet_image)
-        sheet_image.paste(img, (column*options.width, row*options.height))
-        if options.labels:
-            txt_width,txt_height = drw.textsize(i,font=fnt)
-            j = None
-            if txt_width > options.width:
-                j = i[len(i)/2:]
-                i = i[:len(i)/2]
+        sheet = 0
+        row = 0
+        column = 0
+        sheet_width = options.columns * options.width
+        sheet_height = options.rows * options.height
+        sheet_image = None
+        fnt = ImageFont.load_default()
+        for (i,f) in frames:
+            img = Image.open(f,"r")
+            if not sheet_image:
+                sheet_image = Image.new( img.mode, (int(sheet_width),int(sheet_height)), "black")
+                drw =  ImageDraw.Draw(sheet_image)
+            sheet_image.paste(img, (column*options.width, row*options.height))
+            if options.labels:
                 txt_width,txt_height = drw.textsize(i,font=fnt)
-            drw.rectangle([(column*options.width,row*options.height),((column*options.width)+txt_width,(row*options.height)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
-            drw.text((column*options.width,row*options.height),i,font=fnt,fill=(255,255,255,255))
-            if j:
-                txt_width,txt_height = drw.textsize(j,font=fnt)
-                drw.rectangle([(column*options.width,(row*options.height)+txt_height),((column*options.width)+txt_width,(row*options.height)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
-                drw.text((column*options.width,(row*options.height)+txt_height),j,font=fnt,fill=(255,255,255,255))
+                j = None
+                if txt_width > options.width:
+                    j = i[len(i)/2:]
+                    i = i[:len(i)/2]
+                    txt_width,txt_height = drw.textsize(i,font=fnt)
+                drw.rectangle([(column*options.width,row*options.height),((column*options.width)+txt_width,(row*options.height)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                drw.text((column*options.width,row*options.height),i,font=fnt,fill=(255,255,255,255))
+                if j:
+                    txt_width,txt_height = drw.textsize(j,font=fnt)
+                    drw.rectangle([(column*options.width,(row*options.height)+txt_height),((column*options.width)+txt_width,(row*options.height)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                    drw.text((column*options.width,(row*options.height)+txt_height),j,font=fnt,fill=(255,255,255,255))
 
-        saferemove(f)
-        column = column + 1
-        if column > options.columns:
-            column = 0
-            row = row + 1
-        if row > options.rows:
-            row = 0
+            column = column + 1
+            if column > options.columns:
+                column = 0
+                row = row + 1
+            if row > options.rows:
+                row = 0
+                sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
+                sheet = sheet + 1
+                sheet_image = None
+        if sheet_image:
             sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
-            sheet = sheet + 1
-            sheet_image = None
-    if sheet_image:
-        sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
 
     if options.verbose:
         print("Done")
