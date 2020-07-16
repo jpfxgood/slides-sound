@@ -3,6 +3,30 @@ A set of tools for generating slide shows from images with improvised sound trac
 
 This is a project that I've been working on off and on, I'd like to eventually turn it into a web service to allow folks to upload or point to images and then generate the slideshows. The image processing and the music generation is very simplistic and definitely a work in progress.
 
+Installation
+==================================================================================
+
+You can install it from pypi by doing:
+    
+    python3 -m pip install slides-sound
+
+The scripts will end up on your ~/.local/bin directory and you should make sure this is on your path.
+
+OR
+
+You can check out the repo from https://gitub.com/jpfxgood/slides-sound to a directory and put the scripts directory on your path and also put the checkout directory on the PYTHONPATH so that it's package can be found.
+
+Or download the zip file from the github release at the path above and unzip it and do the same thing.
+
+You can install the dependencies by doing:
+
+    python3 -m pip install -r requirements.txt
+
+I recommend upgrading pip before you do any of the above by doing:
+
+    python3 -m pip install --upgrade pip
+
+
 Slides
 ==================================================================================
 
