@@ -5,6 +5,7 @@ from slides_sound import soundgen
 from slides_sound import notes
 from slides_sound.soundgen import init_sample_cache,init_sample_cache_sf,find_default_soundfont,improvise_ex,DeltaGenerator,arpegiate_ex,play_song,load_music
 from slides_sound.notes import Song, C, N, S
+from slides_sound.version import __version__
 from optparse import OptionParser
 import traceback
 import sys
@@ -14,6 +15,10 @@ import os
 
 def main(options, args):
     """ The main driver for the music utility """
+    if options.version:
+        print("music version %s"%__version__)
+        return(0)
+
     deltas = []
     d_gen = None
     stime = 0
@@ -164,6 +169,7 @@ if __name__ == '__main__':
     parser.add_option("-f","--soundfonts", dest="soundfonts", default= [], action="append", help="Add soundfont to use for a voice, format is {bank number}:{preset number}:{full path to soundfont} will default to 0:0:{first soundfont we find}")
     parser.add_option("-V","--voices", dest="voices", default="0,0,0", help="Voice numbers {chord_voice},{melody_voice},{rhythm_voice}")
     parser.add_option("-T","--transpose", dest="transpose", default="1,1,-1", help="Transpose voices {chord_transpose},{melody_transpose},{rhythm_transpose}")
+    parser.add_option("-I","--version", dest="version", action="store_true", default=False, help="Display the script version and exit")
 
 
     (options,args) = parser.parse_args()

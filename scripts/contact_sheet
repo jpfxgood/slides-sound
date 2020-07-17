@@ -11,6 +11,7 @@ from PIL.ExifTags import TAGS
 import subprocess
 from multiprocessing import Pool
 from slides_sound.slides_util import cmpfile,run,saferemove
+from slides_sound.version import __version__
 from tempfile import TemporaryDirectory
 
 def process_frame( img_name, out_frame, width, height, verbose = False ):
@@ -58,6 +59,11 @@ def process_frame( img_name, out_frame, width, height, verbose = False ):
 
 def main(options, args):
     """ The main driver for the slides utility """
+
+    if options.version:
+        print("contact_sheet version %s"%__version__)
+        return(0)
+
     slides = []
     if options.file:
         for ln in open(options.file,"r"):
@@ -140,6 +146,7 @@ if __name__ == '__main__':
     parser.add_option("-p","--path", dest="path", default=".", help="Output path for transformed images")
     parser.add_option("-b","--bleed", dest="bleed", default=18, type="int", help="Bleed around each page in pixels")
     parser.add_option("-d","--dpi", dest="dpi", default=72, type="int", help="Set DPI for output images")
+    parser.add_option("-V","--version", dest="version", action="store_true", default=False, help="Display the script version and exit")
 
     (options,args) = parser.parse_args()
 

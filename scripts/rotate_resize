@@ -11,6 +11,7 @@ from PIL.ExifTags import TAGS
 import subprocess
 from multiprocessing import Pool
 from slides_sound.slides_util import cmpfile,run,saferemove
+from slides_sound.version import __version__
 
 def process_frame( img_name, out_frame, width, height, verbose = False ):
     try:
@@ -57,6 +58,10 @@ def process_frame( img_name, out_frame, width, height, verbose = False ):
 
 def main(options, args):
     """ The main driver for the slides utility """
+    if options.version:
+        print("rotate_resize version %s"%__version__)
+        return(0)
+
     slides = []
     if options.file:
         for ln in open(options.file,"r"):
@@ -90,6 +95,7 @@ if __name__ == '__main__':
     parser.add_option("-x","--width", dest="width", default=320, type="int", help="Width of slide show (default 320)")
     parser.add_option("-y","--height", dest="height", default=240, type="int", help="Height of slide show (default 240)")
     parser.add_option("-p","--path", dest="path", default=".", help="Output path for transformed images")
+    parser.add_option("-V","--version", dest="version", action="store_true", default=False, help="Display the script version and exit")
 
     (options,args) = parser.parse_args()
 
