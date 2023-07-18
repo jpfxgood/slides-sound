@@ -55,7 +55,6 @@ def process_frame( img_name, out_frame, width, height, verbose = False ):
     except:
         tb = traceback.format_exc()
         print(tb, file=sys.stderr)
-        exit(1)
 
 def main(options, args):
     """ The main driver for the slides utility """
@@ -85,7 +84,11 @@ def main(options, args):
             p.apply_async(process_frame,( img_name, out_name, options.width, options.height, options.verbose ))
             frames.append((img_name, out_name))
             frame_idx += 1
+        if options.verbose:
+            print("Closing processing pool")
         p.close()
+        if options.verbose:
+            print("Joining processing pool, waiting for termination")
         p.join()
 
         sheet = 0
@@ -96,38 +99,48 @@ def main(options, args):
         sheet_image = None
         fnt = ImageFont.load_default()
         for (i,f) in frames:
-            img = Image.open(f,"r")
-            if not sheet_image:
-                sheet_image = Image.new( img.mode, (int(sheet_width),int(sheet_height)), "black")
-                drw =  ImageDraw.Draw(sheet_image)
-
-            img_x = (column*options.width)+options.bleed
-            img_y = (row*options.height)+options.bleed
-            sheet_image.paste(img, (img_x, img_y))
-            if options.labels:
-                txt_width,txt_height = drw.textsize(i,font=fnt)
-                j = None
-                if txt_width > options.width:
-                    j = i[len(i)/2:]
-                    i = i[:len(i)/2]
+            try:
+                if options.verbose:
+                    print("Adding frame %s to contact_sheet"%f)
+                img = Image.open(f,"r")
+                if not sheet_image:
+                    sheet_image = Image.new( img.mode, (int(sheet_width),int(sheet_height)), "black")
+                    drw =  ImageDraw.Draw(sheet_image)
+    
+                img_x = (column*options.width)+options.bleed
+                img_y = (row*options.height)+options.bleed
+                sheet_image.paste(img, (img_x, img_y))
+                if options.labels:
                     txt_width,txt_height = drw.textsize(i,font=fnt)
-                drw.rectangle([(img_x,img_y),((img_x)+txt_width,(img_y)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
-                drw.text((img_x,img_y),i,font=fnt,fill=(255,255,255,255))
-                if j:
-                    txt_width,txt_height = drw.textsize(j,font=fnt)
-                    drw.rectangle([(img_x,(img_y)+txt_height),((img_x)+txt_width,(img_y)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
-                    drw.text((img_x,(img_y)+txt_height),j,font=fnt,fill=(255,255,255,255))
-
-            column = column + 1
-            if column >= options.columns:
-                column = 0
-                row = row + 1
-            if row >= options.rows:
-                row = 0
-                sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
-                sheet = sheet + 1
-                sheet_image = None
+                    j = None
+                    if txt_width > options.width:
+                        j = i[len(i)/2:]
+                        i = i[:len(i)/2]
+                        txt_width,txt_height = drw.textsize(i,font=fnt)
+                    drw.rectangle([(img_x,img_y),((img_x)+txt_width,(img_y)+txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                    drw.text((img_x,img_y),i,font=fnt,fill=(255,255,255,255))
+                    if j:
+                        txt_width,txt_height = drw.textsize(j,font=fnt)
+                        drw.rectangle([(img_x,(img_y)+txt_height),((img_x)+txt_width,(img_y)+2*txt_height)],outline=(0,0,0,255),fill=(0,0,0,255))
+                        drw.text((img_x,(img_y)+txt_height),j,font=fnt,fill=(255,255,255,255))
+    
+                column = column + 1
+                if column >= options.columns:
+                    column = 0
+                    row = row + 1
+                if row >= options.rows:
+                    row = 0
+                    if options.verbose:
+                        print("Saving contact sheet %s"%("%s/sheet%04d.jpg"%(options.path,sheet)))
+                    sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet))
+                    sheet = sheet + 1
+                    sheet_image = None
+            except:
+                tb = traceback.format_exc()
+                print(tb, file=sys.stderr)
         if sheet_image:
+            if options.verbose:
+                print("Saving contact sheet %s"%("%s/sheet%04d.jpg"%(options.path,sheet)))
             sheet_image.save("%s/sheet%04d.jpg"%(options.path,sheet), dpi=(options.dpi,options.dpi))
 
     if options.verbose:
