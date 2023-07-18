@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>slides_sound.notes API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>slides_sound.notes</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/python -u
+import re
+import os
+import wave
+import math
+import fluidsynth as fl
+
+notes = {
+&#34;C0&#34;:16.35,
+&#34;C#0&#34;:17.32,
+&#34;Db0&#34;:17.32,
+&#34;D0&#34;:18.35,
+&#34;D#0&#34;:19.45,
+&#34;Eb0&#34;:19.45,
+&#34;E0&#34;:20.60,
+&#34;F0&#34;:21.83,
+&#34;F#0&#34;:23.12,
+&#34;Gb0&#34;:23.12,
+&#34;G0&#34;:24.50,
+&#34;G#0&#34;:25.96,
+&#34;Ab0&#34;:25.96,
+&#34;A0&#34;:27.50,
+&#34;A#0&#34;:29.14,
+&#34;Bb0&#34;:29.14,
+&#34;B0&#34;:30.87,
+&#34;C1&#34;:32.70,
+&#34;C#1&#34;:34.65,
+&#34;Db1&#34;:34.65,
+&#34;D1&#34;:36.71,
+&#34;D#1&#34;:38.89,
+&#34;Eb1&#34;:38.89,
+&#34;E1&#34;:41.20,
+&#34;F1&#34;:43.65,
+&#34;F#1&#34;:46.25,
+&#34;Gb1&#34;:46.25,
+&#34;G1&#34;:49.00,
+&#34;G#1&#34;:51.91,
+&#34;Ab1&#34;:51.91,
+&#34;A1&#34;:55.00,
+&#34;A#1&#34;:58.27,
+&#34;Bb1&#34;:58.27,
+&#34;B1&#34;:61.74,
+&#34;C2&#34;:65.41,
+&#34;C#2&#34;:69.30,
+&#34;Db2&#34;:69.30,
+&#34;D2&#34;:73.42,
+&#34;D#2&#34;:77.78,
+&#34;Eb2&#34;:77.78,
+&#34;E2&#34;:82.41,
+&#34;F2&#34;:87.31,
+&#34;F#2&#34;:92.50,
+&#34;Gb2&#34;:92.50,
+&#34;G2&#34;:98.00,
+&#34;G#2&#34;:103.83,
+&#34;Ab2&#34;:103.83,
+&#34;A2&#34;:110.00,
+&#34;A#2&#34;:116.54,
+&#34;Bb2&#34;:116.54,
+&#34;B2&#34;:123.47,
+&#34;C3&#34;:130.81,
+&#34;C#3&#34;:138.59,
+&#34;Db3&#34;:138.59,
+&#34;D3&#34;:146.83,
+&#34;D#3&#34;:155.56,
+&#34;Eb3&#34;:155.56,
+&#34;E3&#34;:164.81,
+&#34;F3&#34;:174.61,
+&#34;F#3&#34;:185.00,
+&#34;Gb3&#34;:185.00,
+&#34;G3&#34;:196.00,
+&#34;G#3&#34;:207.65,
+&#34;Ab3&#34;:207.65,
+&#34;A3&#34;:220.00,
+&#34;A#3&#34;:233.08,
+&#34;Bb3&#34;:233.08,
+&#34;B3&#34;:246.94,
+&#34;C4&#34;:261.63,
+&#34;C#4&#34;:277.18,
+&#34;Db4&#34;:277.18,
+&#34;D4&#34;:293.66,
+&#34;D#4&#34;:311.13,
+&#34;Eb4&#34;:311.13,
+&#34;E4&#34;:329.63,
+&#34;F4&#34;:349.23,
+&#34;F#4&#34;:369.99,
+&#34;Gb4&#34;:369.99,
+&#34;G4&#34;:392.00,
+&#34;G#4&#34;:415.30,
+&#34;Ab4&#34;:415.30,
+&#34;A4&#34;:440.00,
+&#34;A#4&#34;:466.16,
+&#34;Bb4&#34;:466.16,
+&#34;B4&#34;:493.88,
+&#34;C5&#34;:523.25,
+&#34;C#5&#34;:554.37,
+&#34;Db5&#34;:554.37,
+&#34;D5&#34;:587.33,
+&#34;D#5&#34;:622.25,
+&#34;Eb5&#34;:622.25,
+&#34;E5&#34;:659.26,
+&#34;F5&#34;:698.46,
+&#34;F#5&#34;:739.99,
+&#34;Gb5&#34;:739.99,
+&#34;G5&#34;:783.99,
+&#34;G#5&#34;:830.61,
+&#34;Ab5&#34;:830.61,
+&#34;A5&#34;:880.00,
+&#34;A#5&#34;:932.33,
+&#34;Bb5&#34;:932.33,
+&#34;B5&#34;:987.77,
+&#34;C6&#34;:1046.50,
+&#34;C#6&#34;:1108.73,
+&#34;Db6&#34;:1108.73,
+&#34;D6&#34;:1174.66,
+&#34;D#6&#34;:1244.51,
+&#34;Eb6&#34;:1244.51,
+&#34;E6&#34;:1318.51,
+&#34;F6&#34;:1396.91,
+&#34;F#6&#34;:1479.98,
+&#34;Gb6&#34;:1479.98,
+&#34;G6&#34;:1567.98,
+&#34;G#6&#34;:1661.22,
+&#34;Ab6&#34;:1661.22,
+&#34;A6&#34;:1760.00,
+&#34;A#6&#34;:1864.66,
+&#34;Bb6&#34;:1864.66,
+&#34;B6&#34;:1975.53,
+&#34;C7&#34;:2093.00,
+&#34;C#7&#34;:2217.46,
+&#34;Db7&#34;:2217.46,
+&#34;D7&#34;:2349.32,
+&#34;D#7&#34;:2489.02,
+&#34;Eb7&#34;:2489.02,
+&#34;E7&#34;:2637.02,
+&#34;F7&#34;:2793.83,
+&#34;F#7&#34;:2959.96,
+&#34;Gb7&#34;:2959.96,
+&#34;G7&#34;:3135.96,
+&#34;G#7&#34;:3322.44,
+&#34;Ab7&#34;:3322.44,
+&#34;A7&#34;:3520.00,
+&#34;A#7&#34;:3729.31,
+&#34;Bb7&#34;:3729.31,
+&#34;B7&#34;:3951.07,
+&#34;C8&#34;:4186.01,
+&#34;C#8&#34;:4434.92,
+&#34;Db8&#34;:4434.92,
+&#34;D8&#34;:4698.64,
+&#34;D#8&#34;:4978.03,
+&#34;Eb8&#34;:4978.03,
+}
+
+note_table = [
+(&#34;C0&#34;,16.35),
+(&#34;C#0&#34;,17.32),
+(&#34;Db0&#34;,17.32),
+(&#34;D0&#34;,18.35),
+(&#34;D#0&#34;,19.45),
+(&#34;Eb0&#34;,19.45),
+(&#34;E0&#34;,20.60),
+(&#34;F0&#34;,21.83),
+(&#34;F#0&#34;,23.12),
+(&#34;Gb0&#34;,23.12),
+(&#34;G0&#34;,24.50),
+(&#34;G#0&#34;,25.96),
+(&#34;Ab0&#34;,25.96),
+(&#34;A0&#34;,27.50),
+(&#34;A#0&#34;,29.14),
+(&#34;Bb0&#34;,29.14),
+(&#34;B0&#34;,30.87),
+(&#34;C1&#34;,32.70),
+(&#34;C#1&#34;,34.65),
+(&#34;Db1&#34;,34.65),
+(&#34;D1&#34;,36.71),
+(&#34;D#1&#34;,38.89),
+(&#34;Eb1&#34;,38.89),
+(&#34;E1&#34;,41.20),
+(&#34;F1&#34;,43.65),
+(&#34;F#1&#34;,46.25),
+(&#34;Gb1&#34;,46.25),
+(&#34;G1&#34;,49.00),
+(&#34;G#1&#34;,51.91),
+(&#34;Ab1&#34;,51.91),
+(&#34;A1&#34;,55.00),
+(&#34;A#1&#34;,58.27),
+(&#34;Bb1&#34;,58.27),
+(&#34;B1&#34;,61.74),
+(&#34;C2&#34;,65.41),
+(&#34;C#2&#34;,69.30),
+(&#34;Db2&#34;,69.30),
+(&#34;D2&#34;,73.42),
+(&#34;D#2&#34;,77.78),
+(&#34;Eb2&#34;,77.78),
+(&#34;E2&#34;,82.41),
+(&#34;F2&#34;,87.31),
+(&#34;F#2&#34;,92.50),
+(&#34;Gb2&#34;,92.50),
+(&#34;G2&#34;,98.00),
+(&#34;G#2&#34;,103.83),
+(&#34;Ab2&#34;,103.83),
+(&#34;A2&#34;,110.00),
+(&#34;A#2&#34;,116.54),
+(&#34;Bb2&#34;,116.54),
+(&#34;B2&#34;,123.47),
+(&#34;C3&#34;,130.81),
+(&#34;C#3&#34;,138.59),
+(&#34;Db3&#34;,138.59),
+(&#34;D3&#34;,146.83),
+(&#34;D#3&#34;,155.56),
+(&#34;Eb3&#34;,155.56),
+(&#34;E3&#34;,164.81),
+(&#34;F3&#34;,174.61),
+(&#34;F#3&#34;,185.00),
+(&#34;Gb3&#34;,185.00),
+(&#34;G3&#34;,196.00),
+(&#34;G#3&#34;,207.65),
+(&#34;Ab3&#34;,207.65),
+(&#34;A3&#34;,220.00),
+(&#34;A#3&#34;,233.08),
+(&#34;Bb3&#34;,233.08),
+(&#34;B3&#34;,246.94),
+(&#34;C4&#34;,261.63),
+(&#34;C#4&#34;,277.18),
+(&#34;Db4&#34;,277.18),
+(&#34;D4&#34;,293.66),
+(&#34;D#4&#34;,311.13),
+(&#34;Eb4&#34;,311.13),
+(&#34;E4&#34;,329.63),
+(&#34;F4&#34;,349.23),
+(&#34;F#4&#34;,369.99),
+(&#34;Gb4&#34;,369.99),
+(&#34;G4&#34;,392.00),
+(&#34;G#4&#34;,415.30),
+(&#34;Ab4&#34;,415.30),
+(&#34;A4&#34;,440.00),
+(&#34;A#4&#34;,466.16),
+(&#34;Bb4&#34;,466.16),
+(&#34;B4&#34;,493.88),
+(&#34;C5&#34;,523.25),
+(&#34;C#5&#34;,554.37),
+(&#34;Db5&#34;,554.37),
+(&#34;D5&#34;,587.33),
+(&#34;D#5&#34;,622.25),
+(&#34;Eb5&#34;,622.25),
+(&#34;E5&#34;,659.26),
+(&#34;F5&#34;,698.46),
+(&#34;F#5&#34;,739.99),
+(&#34;Gb5&#34;,739.99),
+(&#34;G5&#34;,783.99),
+(&#34;G#5&#34;,830.61),
+(&#34;Ab5&#34;,830.61),
+(&#34;A5&#34;,880.00),
+(&#34;A#5&#34;,932.33),
+(&#34;Bb5&#34;,932.33),
+(&#34;B5&#34;,987.77),
+(&#34;C6&#34;,1046.50),
+(&#34;C#6&#34;,1108.73),
+(&#34;Db6&#34;,1108.73),
+(&#34;D6&#34;,1174.66),
+(&#34;D#6&#34;,1244.51),
+(&#34;Eb6&#34;,1244.51),
+(&#34;E6&#34;,1318.51),
+(&#34;F6&#34;,1396.91),
+(&#34;F#6&#34;,1479.98),
+(&#34;Gb6&#34;,1479.98),
+(&#34;G6&#34;,1567.98),
+(&#34;G#6&#34;,1661.22),
+(&#34;Ab6&#34;,1661.22),
+(&#34;A6&#34;,1760.00),
+(&#34;A#6&#34;,1864.66),
+(&#34;Bb6&#34;,1864.66),
+(&#34;B6&#34;,1975.53),
+(&#34;C7&#34;,2093.00),
+(&#34;C#7&#34;,2217.46),
+(&#34;Db7&#34;,2217.46),
+(&#34;D7&#34;,2349.32),
+(&#34;D#7&#34;,2489.02),
+(&#34;Eb7&#34;,2489.02),
+(&#34;E7&#34;,2637.02),
+(&#34;F7&#34;,2793.83),
+(&#34;F#7&#34;,2959.96),
+(&#34;Gb7&#34;,2959.96),
+(&#34;G7&#34;,3135.96),
+(&#34;G#7&#34;,3322.44),
+(&#34;Ab7&#34;,3322.44),
+(&#34;A7&#34;,3520.00),
+(&#34;A#7&#34;,3729.31),
+(&#34;Bb7&#34;,3729.31),
+(&#34;B7&#34;,3951.07),
+(&#34;C8&#34;,4186.01),
+(&#34;C#8&#34;,4434.92),
+(&#34;Db8&#34;,4434.92),
+(&#34;D8&#34;,4698.64),
+(&#34;D#8&#34;,4978.03),
+(&#34;Eb8&#34;,4978.03),
+]
+
+idx_to_note = {}
+note_to_idx = {}
+note_idx = 0
+interval = 0
+for idx in range(len(note_table)):
+    if note_table[idx][1] != note_table[note_idx][1]:
+        note_idx = idx
+        interval += 1
+    idx_to_note[interval] = note_table[idx][0]
+    note_to_idx[note_table[idx][0]] = interval
+
+max_note_idx = interval
+
+Scales = {
+&#34;Maj&#34;:[2,2,1,2,2,2,1],
+&#34;Min&#34;:[2,1,2,2,1,2,2],
+&#34;MMin&#34;:[2,1,2,2,2,2,2],
+&#34;Blues&#34;:[3,2,1,1,3,2],
+&#34;Mix&#34;:[2,2,1,2,2,1,2],
+&#34;Dor&#34;:[2,1,2,2,2,1,2],
+&#34;Lyd&#34;:[2,2,2,1,2,2,1],
+&#34;LydM&#34;:[2,2,2,1,1,2,2],
+&#34;Who&#34;:[2,2,2,2,2,2,2],
+&#34;Dim&#34;:[1,2,1,2,1,2,1]
+}
+scale_pat = &#34;([A-G]+[b#]*[0-8])(Maj|MMin|Min|Blues|Mix|Dor|LydM|Lyd|Who|Dim)&#34;
+
+Chords = {
+&#34;Maj&#34;:[4,3],
+&#34;Min&#34;:[3,4],
+&#34;7&#34;:[4,3,3],
+&#34;Maj7&#34;:[4,3,4],
+&#34;Min6&#34;:[3,4,2],
+&#34;Min7&#34;:[3,4,3],
+&#34;-Maj7&#34;:[3,4,4],
+&#34;Min7b5&#34;:[3,3,4],
+&#34;7b9&#34;: [4,3,3,3],
+&#34;7#11&#34;:[4,3,3,8]
+}
+chord_pat = &#34;([A-G]+[b#]*[0-8])(\-Maj7|Maj7|Maj|Min6|Min7b5|Min7|Min|7b9|7#11|7)&#34;
+chord_pat_octave = &#34;([A-G]+[b#]*)([0-8])(\-Maj7|Maj7|Maj|Min6|Min7b5|Min7|Min|7b9|7#11|7)&#34;
+
+Chord_Scale_Map = {
+&#34;Maj&#34;:(&#34;Maj&#34;,),
+&#34;Min&#34;:(&#34;Min&#34;,),
+&#34;7&#34;:(&#34;Mix&#34;,&#34;Blues&#34;),
+&#34;Maj7&#34;:(&#34;Lyd&#34;,),
+&#34;Min7&#34;:(&#34;Dor&#34;,),
+&#34;Min6&#34;:(&#34;Dor&#34;,&#34;MMin&#34;),
+&#34;Min7b5&#34;:(&#34;Dim&#34;,),
+&#34;-Maj7&#34;:(&#34;MMin&#34;,),
+&#34;7b9&#34;:(&#34;Dim&#34;,),
+&#34;7#11&#34;:(&#34;LydM&#34;,)
+}
+
+def chord2scales( name ):
+    m = re.match(chord_pat,name)
+    if m:
+        return [m.group(1)+f for f in Chord_Scale_Map[m.group(2)]]
+    else:
+        return None
+
+def split_chord( name ):
+    m = re.match(chord_pat_octave, name)
+    if m:
+        root = m.group(1)
+        octave = int(m.group(2))
+        type = m.group(3)
+        return (root,octave,type)
+    else:
+        return None
+
+def join_chord( root, octave, type ):
+    return root+str(octave)+type
+
+def scale( name, transpose = 0, octaves = 1 ):
+    m = re.match(scale_pat,name)
+    if m:
+        root = note_to_idx[m.group(1)]
+        nroot = root + (transpose*12)
+        if nroot &gt;= 0 and nroot &lt; max_note_idx:
+            root = nroot
+        pattern = Scales[m.group(2)]
+        s = [idx_to_note[root]]
+        while (octaves):
+            for i in pattern:
+                root += i
+                s.append(idx_to_note[root % max_note_idx])
+            octaves -= 1
+        return s
+    else:
+        return []
+
+def closest_index_in_scale( note, scl ):
+    idx = note_to_idx[note]
+    sidx = 0
+    while sidx &lt; len(scl):
+        if note_to_idx[scl[sidx]] &gt;= idx:
+            return sidx
+        sidx += 1
+    return len(scl) / 2
+
+def chord( name ):
+    if name[0] == &#34;[&#34;:
+        return tuple(name[1:-1].split(&#34;,&#34;))
+
+    m = re.match(chord_pat,name)
+    if m:
+        root = note_to_idx[m.group(1)]
+        pattern = Chords[m.group(2)]
+        s = [idx_to_note[root]]
+        for i in pattern:
+            root += i
+            s.append(idx_to_note[root % max_note_idx])
+        return tuple(s)
+    else:
+        return ()
+
+value_to_beats = { 1.0:4.0, 1.5:6.0, 2.0:2.0, 2.5:3.0, 4.0:1.0, 4.5:1.5, 8.0:0.5, 8.5:0.75 }
+
+def duration( tempo, value ):
+    bps = (60.0 / tempo)
+    return bps * value_to_beats[float(value)]
+
+# name can be either a chord name like &#34;C4Maj7&#34; or
+# a list of notes [ &#34;C4&#34;,&#34;E4&#34;,&#34;G4&#34; ] or
+# a string formatted as &#34;[C4,E4,G4]&#34;
+class C:
+    def __init__(self, name, value ):
+        if isinstance(name,list):
+            self.name = &#34;[&#34;+&#34;,&#34;.join(name)+&#34;]&#34;
+        else:
+            self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return &#34;C(\&#34;%s\&#34;,%d)&#34;%(self.name,self.value)
+
+    def notes( self ):
+        return chord(self.name)
+
+class N:
+    def __init__(self, name, value ):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return &#34;N(\&#34;%s\&#34;,%d)&#34;%(self.name,self.value)
+
+class S:
+    def __init__(self, name, value ):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return &#34;S(\&#34;%s\&#34;,%s)&#34;%(self.name,str(self.value))
+
+def total_time( chords, tempo ):
+    &#34;&#34;&#34; return the total time to play chord progression &#34;&#34;&#34;
+    time = 0
+    for c in chords:
+        time += duration( tempo,c.value)
+    return time
+
+class Song:
+    def __init__(self, swing, tempo, measure, beat, chords, melody=None, rhythm=None,
+         song_time= 0, chord_voice = 0, melody_voice = 0, rhythm_voice = 0 ):
+        self.swing = swing
+        self.tempo = tempo
+        self.measure = measure
+        self.beat = beat
+        self.chords = chords
+        self.melody = melody
+        self.rhythm = rhythm
+        self.chord_voice = chord_voice
+        self.melody_voice = melody_voice
+        self.rhythm_voice = rhythm_voice
+        self.song_time = song_time
+        if self.song_time:
+            while total_time(self.chords,self.tempo) &gt; self.song_time+duration( self.tempo,1.0):
+                self.chords.pop(-1)
+
+            chorus = float(song_time) / float(total_time(self.chords,self.tempo))
+            if chorus &gt;= 2.0:
+                chorus = int(chorus)
+                self.chords = self.chords * chorus
+                if self.melody:
+                    self.melody = self.melody * chorus
+                if self.rhythm:
+                    self.rhythm = self.rhythm * chorus
+
+# sample cache is keyed by (Note,Dynamic (p,mp,mf,f,ff)) and contains ( filename, sample ) if sample hasn&#39;t been loaded then sample is None
+sample_cache = {}
+voices =  {}
+
+def load_sample_from_file( filename, verbose=False ):
+    &#34;&#34;&#34; loads a sample directly from a wav file &#34;&#34;&#34;
+    wf =wave.open(filename,&#34;r&#34;)
+    samples = wf.readframes(wf.getnframes())
+    wf.close()
+    if verbose:
+        print(&#34;load_sample_from_file:&#34;,filename)
+    return samples
+
+def midi_note_to_table_idx( midi_note, midi_offset = 21, table_offset = 13 ):
+    &#34;&#34;&#34; compute the note table index of a midi note &#34;&#34;&#34;
+    note_idx = table_offset
+    midi_note -= midi_offset
+    while midi_note:
+        note_idx += 1
+        if note_idx &lt; len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+            note_idx += 1
+        midi_note -= 1
+    return note_idx
+
+def init_sample_cache( directory, voice = 0, midi_offset = 21, table_offset = 13, verbose = False ):
+    &#34;&#34;&#34; init sample cache from samples on disk &#34;&#34;&#34;
+    min_note_idx = 10000
+    max_note_idx = 0
+    for f in os.listdir( directory ):
+        if f.endswith(&#34;.wav&#34;):
+            l = f.split(&#34;_&#34;)
+            r = l[-1].split(&#34;.&#34;)
+            note_idx  = midi_note_to_table_idx(int(r[0]),midi_offset,table_offset)
+            if note_idx &lt; min_note_idx:
+                min_note_idx = note_idx
+            if note_idx &gt; max_note_idx:
+                max_note_idx = note_idx
+            sample_cache[ (note_table[note_idx][0],l[2],voice) ] = ( lambda directory=directory,f=f,verbose=verbose : load_sample_from_file(os.path.join( directory, f),verbose), None )
+            if verbose:
+                print(&#34;stored&#34;,(note_table[note_idx][0],l[2],voice),( os.path.join( directory, f), None ))
+            if note_idx &lt; len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+                note_idx += 1
+                sample_cache[ (note_table[note_idx][0],l[2],voice) ] = (lambda directory=directory,f=f,verbose=verbose : load_sample_from_file( os.path.join( directory, f),verbose), None )
+                if note_idx &lt; min_note_idx:
+                    min_note_idx = note_idx
+                if note_idx &gt; max_note_idx:
+                    max_note_idx = note_idx
+                if verbose:
+                    print(&#34;stored&#34;,(note_table[note_idx][0],l[2],voice),(os.path.join( directory, f), None ))
+    voices[voice] = (min_note_idx, max_note_idx)
+
+def load_sample_from_sf( bank, preset, sf_path, note, dyn, verbose = False ):
+    &#34;&#34;&#34; load one sample from soundfont &#34;&#34;&#34;
+    fs = fl.Synth()
+    fs.start()
+    sf = fs.sfload( sf_path )
+    fs.program_select(0,sf,bank,preset)
+    fs.cc(0,7,127)
+    time = duration( 120, 1 ) * 44100.0
+    decay = int(time/4.0)
+    attack = int(time) - decay
+    dyn_to_velocity = {&#34;p&#34;:48,&#34;mp&#34;:64,&#34;mf&#34;:80,&#34;f&#34;:96,&#34;ff&#34;:112}
+    velocity = dyn_to_velocity[dyn]
+    fs.noteon(0,note,velocity)
+    attack_samples = fs.get_samples(attack)
+    fs.noteoff(0,note)
+    decay_samples = fs.get_samples(decay)
+    output_sample = bytearray(attack_samples)+bytearray(decay_samples)
+    fs.delete()
+    if verbose:
+        print(&#34;load_sample_from_sf:&#34;,bank,preset,sf_path,note,dyn)
+    return output_sample
+
+def find_default_soundfont():
+    &#34;&#34;&#34; look through /usr/share for the first thing ending with *.sf[2,3] &#34;&#34;&#34;
+    for dirpath,dirnames,filenames in os.walk(&#39;/usr/share&#39;):
+            for f in filenames:
+                if f.endswith(&#34;.sf2&#34;) or f.endswith(&#34;.sf3&#34;):
+                    return &#34;0:0:%s&#34;%os.path.join(dirpath,f)
+    return &#34;&#34;
+
+def init_sample_cache_sf( bank, preset, sf_path, voice, midi_offset = 21, table_offset = 13, verbose = False):
+    &#34;&#34;&#34; init sample cache from soundfont &#34;&#34;&#34;
+
+    if verbose:
+        print(&#34;initalizing cache for soundfont:&#34;,bank,preset,sf_path)
+
+    min_note_idx = 10000
+    max_note_idx = 0
+    for midi_note in range(21,108):
+        for dyn in [&#34;p&#34;,&#34;mp&#34;,&#34;mf&#34;,&#34;f&#34;,&#34;ff&#34;]:
+            note_idx = midi_note_to_table_idx(midi_note,midi_offset,table_offset)
+            sample_cache[ ( note_table[note_idx][0],dyn,voice ) ] = (lambda bank=bank,preset=preset,sf_path=sf_path,midi_note=midi_note,dyn=dyn,verbose=verbose: load_sample_from_sf( bank, preset, sf_path, midi_note, dyn, verbose ), None)
+            if verbose:
+                print(&#34;stored&#34;,(note_table[note_idx][0],dyn,voice),( &#34;%d:%d:%d:%s&#34;%(midi_note,bank,preset,sf_path), None ))
+            if note_idx &lt; min_note_idx:
+                min_note_idx = note_idx
+            if note_idx &gt; max_note_idx:
+                max_note_idx = note_idx
+            if note_idx &lt; len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+                note_idx += 1
+                sample_cache[ (note_table[note_idx][0],dyn,voice) ] = (lambda bank=bank,preset=preset,sf_path=sf_path,midi_note=midi_note,dyn=dyn,verbose=verbose: load_sample_from_sf( bank, preset, sf_path, midi_note, dyn, verbose ), None )
+                if verbose:
+                    print(&#34;stored&#34;,(note_table[note_idx][0],dyn,voice),( &#34;%d:%d:%d:%s&#34;%(midi_note,bank,preset,sf_path), None ))
+                if note_idx &lt; min_note_idx:
+                    min_note_idx = note_idx
+                if note_idx &gt; max_note_idx:
+                    max_note_idx = note_idx
+    voices[voice] = (min_note_idx,max_note_idx)
+
+def get_cached_sample ( name, dynamic,voice= 0,verbose = False ):
+    while note_to_idx[name] &lt; voices[voice][0]:
+        name = idx_to_note[note_to_idx[name]+12]
+    while note_to_idx[name] &gt; voices[voice][1]:
+        name = idx_to_note[note_to_idx[name]-12]
+    if (name,dynamic,voice) in sample_cache:
+        if verbose:
+            print(&#34;found&#34;,(name,dynamic,voice))
+        ce = sample_cache[(name,dynamic,voice)]
+        if ce[1] == None:
+            samples = ce[0]()
+            sample_cache[(name,dynamic,voice)] = (ce[0],samples)
+            return samples
+        else:
+            return ce[1]
+    else:
+        if verbose:
+            print(&#34;not found&#34;,(name,dynamic,voice))
+        return None
+
+
+if __name__ == &#39;__main__&#39;:
+    init_sample_cache( &#34;/home/james/Downloads/ssamples&#34; )
+    print(sorted(sample_cache.items()))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="slides_sound.notes.chord"><code class="name flex">
+<span>def <span class="ident">chord</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def chord( name ):
+    if name[0] == &#34;[&#34;:
+        return tuple(name[1:-1].split(&#34;,&#34;))
+
+    m = re.match(chord_pat,name)
+    if m:
+        root = note_to_idx[m.group(1)]
+        pattern = Chords[m.group(2)]
+        s = [idx_to_note[root]]
+        for i in pattern:
+            root += i
+            s.append(idx_to_note[root % max_note_idx])
+        return tuple(s)
+    else:
+        return ()</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.chord2scales"><code class="name flex">
+<span>def <span class="ident">chord2scales</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def chord2scales( name ):
+    m = re.match(chord_pat,name)
+    if m:
+        return [m.group(1)+f for f in Chord_Scale_Map[m.group(2)]]
+    else:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.closest_index_in_scale"><code class="name flex">
+<span>def <span class="ident">closest_index_in_scale</span></span>(<span>note, scl)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def closest_index_in_scale( note, scl ):
+    idx = note_to_idx[note]
+    sidx = 0
+    while sidx &lt; len(scl):
+        if note_to_idx[scl[sidx]] &gt;= idx:
+            return sidx
+        sidx += 1
+    return len(scl) / 2</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.duration"><code class="name flex">
+<span>def <span class="ident">duration</span></span>(<span>tempo, value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def duration( tempo, value ):
+    bps = (60.0 / tempo)
+    return bps * value_to_beats[float(value)]</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.find_default_soundfont"><code class="name flex">
+<span>def <span class="ident">find_default_soundfont</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>look through /usr/share for the first thing ending with *.sf[2,3]</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_default_soundfont():
+    &#34;&#34;&#34; look through /usr/share for the first thing ending with *.sf[2,3] &#34;&#34;&#34;
+    for dirpath,dirnames,filenames in os.walk(&#39;/usr/share&#39;):
+            for f in filenames:
+                if f.endswith(&#34;.sf2&#34;) or f.endswith(&#34;.sf3&#34;):
+                    return &#34;0:0:%s&#34;%os.path.join(dirpath,f)
+    return &#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.get_cached_sample"><code class="name flex">
+<span>def <span class="ident">get_cached_sample</span></span>(<span>name, dynamic, voice=0, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_cached_sample ( name, dynamic,voice= 0,verbose = False ):
+    while note_to_idx[name] &lt; voices[voice][0]:
+        name = idx_to_note[note_to_idx[name]+12]
+    while note_to_idx[name] &gt; voices[voice][1]:
+        name = idx_to_note[note_to_idx[name]-12]
+    if (name,dynamic,voice) in sample_cache:
+        if verbose:
+            print(&#34;found&#34;,(name,dynamic,voice))
+        ce = sample_cache[(name,dynamic,voice)]
+        if ce[1] == None:
+            samples = ce[0]()
+            sample_cache[(name,dynamic,voice)] = (ce[0],samples)
+            return samples
+        else:
+            return ce[1]
+    else:
+        if verbose:
+            print(&#34;not found&#34;,(name,dynamic,voice))
+        return None</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.init_sample_cache"><code class="name flex">
+<span>def <span class="ident">init_sample_cache</span></span>(<span>directory, voice=0, midi_offset=21, table_offset=13, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>init sample cache from samples on disk</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init_sample_cache( directory, voice = 0, midi_offset = 21, table_offset = 13, verbose = False ):
+    &#34;&#34;&#34; init sample cache from samples on disk &#34;&#34;&#34;
+    min_note_idx = 10000
+    max_note_idx = 0
+    for f in os.listdir( directory ):
+        if f.endswith(&#34;.wav&#34;):
+            l = f.split(&#34;_&#34;)
+            r = l[-1].split(&#34;.&#34;)
+            note_idx  = midi_note_to_table_idx(int(r[0]),midi_offset,table_offset)
+            if note_idx &lt; min_note_idx:
+                min_note_idx = note_idx
+            if note_idx &gt; max_note_idx:
+                max_note_idx = note_idx
+            sample_cache[ (note_table[note_idx][0],l[2],voice) ] = ( lambda directory=directory,f=f,verbose=verbose : load_sample_from_file(os.path.join( directory, f),verbose), None )
+            if verbose:
+                print(&#34;stored&#34;,(note_table[note_idx][0],l[2],voice),( os.path.join( directory, f), None ))
+            if note_idx &lt; len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+                note_idx += 1
+                sample_cache[ (note_table[note_idx][0],l[2],voice) ] = (lambda directory=directory,f=f,verbose=verbose : load_sample_from_file( os.path.join( directory, f),verbose), None )
+                if note_idx &lt; min_note_idx:
+                    min_note_idx = note_idx
+                if note_idx &gt; max_note_idx:
+                    max_note_idx = note_idx
+                if verbose:
+                    print(&#34;stored&#34;,(note_table[note_idx][0],l[2],voice),(os.path.join( directory, f), None ))
+    voices[voice] = (min_note_idx, max_note_idx)</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.init_sample_cache_sf"><code class="name flex">
+<span>def <span class="ident">init_sample_cache_sf</span></span>(<span>bank, preset, sf_path, voice, midi_offset=21, table_offset=13, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>init sample cache from soundfont</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init_sample_cache_sf( bank, preset, sf_path, voice, midi_offset = 21, table_offset = 13, verbose = False):
+    &#34;&#34;&#34; init sample cache from soundfont &#34;&#34;&#34;
+
+    if verbose:
+        print(&#34;initalizing cache for soundfont:&#34;,bank,preset,sf_path)
+
+    min_note_idx = 10000
+    max_note_idx = 0
+    for midi_note in range(21,108):
+        for dyn in [&#34;p&#34;,&#34;mp&#34;,&#34;mf&#34;,&#34;f&#34;,&#34;ff&#34;]:
+            note_idx = midi_note_to_table_idx(midi_note,midi_offset,table_offset)
+            sample_cache[ ( note_table[note_idx][0],dyn,voice ) ] = (lambda bank=bank,preset=preset,sf_path=sf_path,midi_note=midi_note,dyn=dyn,verbose=verbose: load_sample_from_sf( bank, preset, sf_path, midi_note, dyn, verbose ), None)
+            if verbose:
+                print(&#34;stored&#34;,(note_table[note_idx][0],dyn,voice),( &#34;%d:%d:%d:%s&#34;%(midi_note,bank,preset,sf_path), None ))
+            if note_idx &lt; min_note_idx:
+                min_note_idx = note_idx
+            if note_idx &gt; max_note_idx:
+                max_note_idx = note_idx
+            if note_idx &lt; len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+                note_idx += 1
+                sample_cache[ (note_table[note_idx][0],dyn,voice) ] = (lambda bank=bank,preset=preset,sf_path=sf_path,midi_note=midi_note,dyn=dyn,verbose=verbose: load_sample_from_sf( bank, preset, sf_path, midi_note, dyn, verbose ), None )
+                if verbose:
+                    print(&#34;stored&#34;,(note_table[note_idx][0],dyn,voice),( &#34;%d:%d:%d:%s&#34;%(midi_note,bank,preset,sf_path), None ))
+                if note_idx &lt; min_note_idx:
+                    min_note_idx = note_idx
+                if note_idx &gt; max_note_idx:
+                    max_note_idx = note_idx
+    voices[voice] = (min_note_idx,max_note_idx)</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.join_chord"><code class="name flex">
+<span>def <span class="ident">join_chord</span></span>(<span>root, octave, type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def join_chord( root, octave, type ):
+    return root+str(octave)+type</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.load_sample_from_file"><code class="name flex">
+<span>def <span class="ident">load_sample_from_file</span></span>(<span>filename, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>loads a sample directly from a wav file</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_sample_from_file( filename, verbose=False ):
+    &#34;&#34;&#34; loads a sample directly from a wav file &#34;&#34;&#34;
+    wf =wave.open(filename,&#34;r&#34;)
+    samples = wf.readframes(wf.getnframes())
+    wf.close()
+    if verbose:
+        print(&#34;load_sample_from_file:&#34;,filename)
+    return samples</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.load_sample_from_sf"><code class="name flex">
+<span>def <span class="ident">load_sample_from_sf</span></span>(<span>bank, preset, sf_path, note, dyn, verbose=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>load one sample from soundfont</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_sample_from_sf( bank, preset, sf_path, note, dyn, verbose = False ):
+    &#34;&#34;&#34; load one sample from soundfont &#34;&#34;&#34;
+    fs = fl.Synth()
+    fs.start()
+    sf = fs.sfload( sf_path )
+    fs.program_select(0,sf,bank,preset)
+    fs.cc(0,7,127)
+    time = duration( 120, 1 ) * 44100.0
+    decay = int(time/4.0)
+    attack = int(time) - decay
+    dyn_to_velocity = {&#34;p&#34;:48,&#34;mp&#34;:64,&#34;mf&#34;:80,&#34;f&#34;:96,&#34;ff&#34;:112}
+    velocity = dyn_to_velocity[dyn]
+    fs.noteon(0,note,velocity)
+    attack_samples = fs.get_samples(attack)
+    fs.noteoff(0,note)
+    decay_samples = fs.get_samples(decay)
+    output_sample = bytearray(attack_samples)+bytearray(decay_samples)
+    fs.delete()
+    if verbose:
+        print(&#34;load_sample_from_sf:&#34;,bank,preset,sf_path,note,dyn)
+    return output_sample</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.midi_note_to_table_idx"><code class="name flex">
+<span>def <span class="ident">midi_note_to_table_idx</span></span>(<span>midi_note, midi_offset=21, table_offset=13)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>compute the note table index of a midi note</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def midi_note_to_table_idx( midi_note, midi_offset = 21, table_offset = 13 ):
+    &#34;&#34;&#34; compute the note table index of a midi note &#34;&#34;&#34;
+    note_idx = table_offset
+    midi_note -= midi_offset
+    while midi_note:
+        note_idx += 1
+        if note_idx &lt; len(note_table)-1 and note_table[note_idx][1] == note_table[note_idx+1][1]:
+            note_idx += 1
+        midi_note -= 1
+    return note_idx</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.scale"><code class="name flex">
+<span>def <span class="ident">scale</span></span>(<span>name, transpose=0, octaves=1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def scale( name, transpose = 0, octaves = 1 ):
+    m = re.match(scale_pat,name)
+    if m:
+        root = note_to_idx[m.group(1)]
+        nroot = root + (transpose*12)
+        if nroot &gt;= 0 and nroot &lt; max_note_idx:
+            root = nroot
+        pattern = Scales[m.group(2)]
+        s = [idx_to_note[root]]
+        while (octaves):
+            for i in pattern:
+                root += i
+                s.append(idx_to_note[root % max_note_idx])
+            octaves -= 1
+        return s
+    else:
+        return []</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.split_chord"><code class="name flex">
+<span>def <span class="ident">split_chord</span></span>(<span>name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def split_chord( name ):
+    m = re.match(chord_pat_octave, name)
+    if m:
+        root = m.group(1)
+        octave = int(m.group(2))
+        type = m.group(3)
+        return (root,octave,type)
+    else:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.total_time"><code class="name flex">
+<span>def <span class="ident">total_time</span></span>(<span>chords, tempo)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>return the total time to play chord progression</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def total_time( chords, tempo ):
+    &#34;&#34;&#34; return the total time to play chord progression &#34;&#34;&#34;
+    time = 0
+    for c in chords:
+        time += duration( tempo,c.value)
+    return time</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="slides_sound.notes.C"><code class="flex name class">
+<span>class <span class="ident">C</span></span>
+<span>(</span><span>name, value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class C:
+    def __init__(self, name, value ):
+        if isinstance(name,list):
+            self.name = &#34;[&#34;+&#34;,&#34;.join(name)+&#34;]&#34;
+        else:
+            self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return &#34;C(\&#34;%s\&#34;,%d)&#34;%(self.name,self.value)
+
+    def notes( self ):
+        return chord(self.name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="slides_sound.notes.C.notes"><code class="name flex">
+<span>def <span class="ident">notes</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def notes( self ):
+    return chord(self.name)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="slides_sound.notes.N"><code class="flex name class">
+<span>class <span class="ident">N</span></span>
+<span>(</span><span>name, value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class N:
+    def __init__(self, name, value ):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return &#34;N(\&#34;%s\&#34;,%d)&#34;%(self.name,self.value)</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.S"><code class="flex name class">
+<span>class <span class="ident">S</span></span>
+<span>(</span><span>name, value)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class S:
+    def __init__(self, name, value ):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return &#34;S(\&#34;%s\&#34;,%s)&#34;%(self.name,str(self.value))</code></pre>
+</details>
+</dd>
+<dt id="slides_sound.notes.Song"><code class="flex name class">
+<span>class <span class="ident">Song</span></span>
+<span>(</span><span>swing, tempo, measure, beat, chords, melody=None, rhythm=None, song_time=0, chord_voice=0, melody_voice=0, rhythm_voice=0)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Song:
+    def __init__(self, swing, tempo, measure, beat, chords, melody=None, rhythm=None,
+         song_time= 0, chord_voice = 0, melody_voice = 0, rhythm_voice = 0 ):
+        self.swing = swing
+        self.tempo = tempo
+        self.measure = measure
+        self.beat = beat
+        self.chords = chords
+        self.melody = melody
+        self.rhythm = rhythm
+        self.chord_voice = chord_voice
+        self.melody_voice = melody_voice
+        self.rhythm_voice = rhythm_voice
+        self.song_time = song_time
+        if self.song_time:
+            while total_time(self.chords,self.tempo) &gt; self.song_time+duration( self.tempo,1.0):
+                self.chords.pop(-1)
+
+            chorus = float(song_time) / float(total_time(self.chords,self.tempo))
+            if chorus &gt;= 2.0:
+                chorus = int(chorus)
+                self.chords = self.chords * chorus
+                if self.melody:
+                    self.melody = self.melody * chorus
+                if self.rhythm:
+                    self.rhythm = self.rhythm * chorus</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="slides_sound.notes.chord" href="#slides_sound.notes.chord">chord</a></code></li>
+<li><code><a title="slides_sound.notes.chord2scales" href="#slides_sound.notes.chord2scales">chord2scales</a></code></li>
+<li><code><a title="slides_sound.notes.closest_index_in_scale" href="#slides_sound.notes.closest_index_in_scale">closest_index_in_scale</a></code></li>
+<li><code><a title="slides_sound.notes.duration" href="#slides_sound.notes.duration">duration</a></code></li>
+<li><code><a title="slides_sound.notes.find_default_soundfont" href="#slides_sound.notes.find_default_soundfont">find_default_soundfont</a></code></li>
+<li><code><a title="slides_sound.notes.get_cached_sample" href="#slides_sound.notes.get_cached_sample">get_cached_sample</a></code></li>
+<li><code><a title="slides_sound.notes.init_sample_cache" href="#slides_sound.notes.init_sample_cache">init_sample_cache</a></code></li>
+<li><code><a title="slides_sound.notes.init_sample_cache_sf" href="#slides_sound.notes.init_sample_cache_sf">init_sample_cache_sf</a></code></li>
+<li><code><a title="slides_sound.notes.join_chord" href="#slides_sound.notes.join_chord">join_chord</a></code></li>
+<li><code><a title="slides_sound.notes.load_sample_from_file" href="#slides_sound.notes.load_sample_from_file">load_sample_from_file</a></code></li>
+<li><code><a title="slides_sound.notes.load_sample_from_sf" href="#slides_sound.notes.load_sample_from_sf">load_sample_from_sf</a></code></li>
+<li><code><a title="slides_sound.notes.midi_note_to_table_idx" href="#slides_sound.notes.midi_note_to_table_idx">midi_note_to_table_idx</a></code></li>
+<li><code><a title="slides_sound.notes.scale" href="#slides_sound.notes.scale">scale</a></code></li>
+<li><code><a title="slides_sound.notes.split_chord" href="#slides_sound.notes.split_chord">split_chord</a></code></li>
+<li><code><a title="slides_sound.notes.total_time" href="#slides_sound.notes.total_time">total_time</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="slides_sound.notes.C" href="#slides_sound.notes.C">C</a></code></h4>
+<ul class="">
+<li><code><a title="slides_sound.notes.C.notes" href="#slides_sound.notes.C.notes">notes</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="slides_sound.notes.N" href="#slides_sound.notes.N">N</a></code></h4>
+</li>
+<li>
+<h4><code><a title="slides_sound.notes.S" href="#slides_sound.notes.S">S</a></code></h4>
+</li>
+<li>
+<h4><code><a title="slides_sound.notes.Song" href="#slides_sound.notes.Song">Song</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

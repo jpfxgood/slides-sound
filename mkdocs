@@ -1,14 +1,15 @@
 #!/bin/bash -x
 rm -rf docs/*
-export PYTHONPATH=$PYTHONPATH:"."
+#export PYTHONPATH=$PYTHONPATH:"."
 gen_doc () {
     local module_name="`basename $1 .py`"
     local module_path="`dirname $1`"
     if [ $module_name = "__init__" ];
         then return;
     fi
-    pdoc --html --template-dir templates --html-dir docs $module_path.$module_name
-    echo "<li><a href=\"./$module_path/$module_name.m.html\">$module_name</a></li>" >>docs/index.html
+#    pdoc3 --html --template-dir templates --html-dir docs $module_path.$module_name
+    pdoc3 --html --output-dir docs $module_path.$module_name
+    echo "<li><a href=\"./$module_path/$module_name.html\">$module_name</a></li>" >>docs/index.html
     }
 cat templates/header.html >docs/index.html
 markdown LICENSE >>docs/index.html
